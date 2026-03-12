@@ -1,10 +1,13 @@
 import {
   createContext,
+  useEffect,
   useContext,
   useState,
   type FC,
   type ReactNode,
 } from "react"
+
+import { fetchScores, saveScore } from "../api/scoreApi"
 
 export type GameRecord = {
   playerName: string
@@ -31,7 +34,8 @@ type StatsContextValue = Stats & {
   recordLoss: () => void
 }
 
-const STORAGE_KEY = "wordle-stats"
+const STATS_STORAGE_KEY = "wordle-stats"
+const SCORE_REFRESH_INTERVAL_MS = 15_000
 
 const defaultStats: Stats = {
   gamesPlayed: 0,
@@ -46,19 +50,21 @@ function getTodayDate(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
+function normalizeRecord(record: Partial<GameRecord>): GameRecord {
+  return {
+    playerName: record.playerName || "Anonymous",
+    word: record.word ?? "",
+    guesses: record.guesses ?? 0,
+    date: record.date ?? new Date(0).toISOString(),
+  }
+}
+
 function loadStats(): Stats {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY)
+    const stored = localStorage.getItem(STATS_STORAGE_KEY)
     if (stored) {
       const parsed = JSON.parse(stored) as Partial<Stats>
-      const normalizedHistory = (parsed.history ?? []).map((record) => ({
-        playerName: record.playerName || "Anonymous",
-        word: record.word,
-        guesses: record.guesses,
-        date: record.date,
-      }))
-
-      return { ...defaultStats, ...parsed, history: normalizedHistory }
+      return { ...defaultStats, ...parsed, history: [] }
     }
   } catch {
     // Ignore parse errors
@@ -67,7 +73,7 @@ function loadStats(): Stats {
 }
 
 function saveStats(stats: Stats) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(stats))
+  localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(stats))
 }
 
 const StatsContext = createContext<StatsContextValue | null>(null)
@@ -83,17 +89,47 @@ export const useStats = (): StatsContextValue => {
 export const StatsProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [stats, setStats] = useState<Stats>(loadStats)
 
+  useEffect(() => {
+    let isActive = true
+
+    const syncScores = async () => {
+      try {
+        const history = await fetchScores()
+        if (!isActive) {
+          return
+        }
+
+        setStats((prev) => {
+          const updated = { ...prev, history }
+          saveStats(updated)
+          return updated
+        })
+      } catch {
+        // Ignore backend fetch errors and keep existing local state.
+      }
+    }
+
+    void syncScores()
+    const intervalId = window.setInterval(syncScores, SCORE_REFRESH_INTERVAL_MS)
+
+    return () => {
+      isActive = false
+      window.clearInterval(intervalId)
+    }
+  }, [])
+
   const hasPlayedToday = DAILY_MODE && stats.lastPlayDate === getTodayDate()
 
   const recordWin = (playerName: string, word: string, guesses: number) => {
+    const record: GameRecord = {
+      playerName,
+      word,
+      guesses,
+      date: new Date().toISOString(),
+    }
+
     setStats((prev) => {
       const newStreak = prev.currentStreak + 1
-      const record: GameRecord = {
-        playerName,
-        word,
-        guesses,
-        date: new Date().toISOString(),
-      }
       const updated: Stats = {
         ...prev,
         gamesPlayed: prev.gamesPlayed + 1,
@@ -106,6 +142,20 @@ export const StatsProvider: FC<{ children: ReactNode }> = ({ children }) => {
       saveStats(updated)
       return updated
     })
+
+    void (async () => {
+      try {
+        await saveScore(record)
+        const history = await fetchScores()
+        setStats((prev) => {
+          const updated = { ...prev, history }
+          saveStats(updated)
+          return updated
+        })
+      } catch {
+        // Ignore backend save errors and keep optimistic local state.
+      }
+    })()
   }
 
   const recordLoss = () => {

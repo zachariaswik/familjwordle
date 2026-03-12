@@ -40,6 +40,25 @@ npm run dev
 
 Opens the game at `http://localhost:5173`
 
+## Full-Stack Development (Frontend + Score API)
+
+```bash
+npm run dev:full
+```
+
+This starts:
+
+- frontend on `http://localhost:5173`
+- score API on `http://localhost:8787`
+
+The API persists submitted scores in `server/data/scores.json`, so all clients using the same backend will see the same scoreboard.
+
+### Backend API only
+
+```bash
+npm run start:api
+```
+
 ## Build
 
 ```bash
