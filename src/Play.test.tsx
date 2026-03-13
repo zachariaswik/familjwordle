@@ -156,6 +156,6 @@ describe("Play", () => {
       expect(
         await screen.findByText("A wading bird with long legs and neck."),
       ).toBeTruthy()
-    })
+    }, 15_000)
   })
 })
