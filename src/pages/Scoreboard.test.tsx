@@ -3,17 +3,17 @@ import { describe, expect, it } from "vitest"
 
 import { StatsProvider } from "../contexts/StatsContext"
 
-import History from "./History"
+import Scoreboard from "./Scoreboard"
 
-describe("History", () => {
+describe("Scoreboard", () => {
   it("renders empty state when no games played", () => {
     render(
       <StatsProvider>
-        <History />
+        <Scoreboard />
       </StatsProvider>,
     )
 
-    expect(screen.getByText("Scores")).toBeTruthy()
+    expect(screen.getByText("Scoreboard")).toBeTruthy()
     expect(
       screen.getByText(
         "No scores yet. Win a game to see your scoreboard here!",

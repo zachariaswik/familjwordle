@@ -17,7 +17,7 @@ function isToday(dateStr: string): boolean {
   return scoreDate === today
 }
 
-const History: React.FC = () => {
+const Scoreboard: React.FC = () => {
   const { history } = useStats()
   const todayScores = history.filter((r) => isToday(r.date))
 
@@ -33,7 +33,7 @@ const History: React.FC = () => {
       }}
     >
       <Typography variant="h3" color="primary.dark" gutterBottom>
-        Scores
+        Scoreboard
       </Typography>
 
       {todayScores.length === 0 ? (
@@ -46,7 +46,6 @@ const History: React.FC = () => {
             <TableHead>
               <TableRow>
                 <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Word</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Score</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Date</TableCell>
               </TableRow>
@@ -55,11 +54,6 @@ const History: React.FC = () => {
               {[...todayScores].reverse().map((record, index) => (
                 <TableRow key={index}>
                   <TableCell>{record.playerName}</TableCell>
-                  <TableCell
-                    sx={{ textTransform: "uppercase", fontWeight: 600 }}
-                  >
-                    {record.word}
-                  </TableCell>
                   <TableCell>{record.guesses}/6</TableCell>
                   <TableCell>
                     {new Date(record.date).toLocaleDateString()}
@@ -74,4 +68,4 @@ const History: React.FC = () => {
   )
 }
 
-export default History
+export default Scoreboard

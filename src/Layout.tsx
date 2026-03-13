@@ -66,10 +66,10 @@ const Layout: React.FC = () => {
             </Button>
             <Button
               color="inherit"
-              onClick={() => navigate("/scores")}
+              onClick={() => navigate("/scoreboard")}
               sx={{ "&:hover": { opacity: 0.8 } }}
             >
-              Scores
+              Scoreboard
             </Button>
             <Button
               color="inherit"

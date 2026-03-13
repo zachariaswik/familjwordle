@@ -22,7 +22,7 @@ describe("Layout", () => {
     expect(screen.getByText("Wordle")).toBeTruthy()
     expect(screen.getByRole("button", { name: "Home" })).toBeTruthy()
     expect(screen.getByRole("button", { name: "Play" })).toBeTruthy()
-    expect(screen.getByRole("button", { name: "Scores" })).toBeTruthy()
+    expect(screen.getByRole("button", { name: "Scoreboard" })).toBeTruthy()
     expect(screen.getByRole("button", { name: "About" })).toBeTruthy()
     expect(screen.getByText("Home Content")).toBeTruthy()
     expect(screen.getByText(/2026 Wordle Class Project/)).toBeTruthy()

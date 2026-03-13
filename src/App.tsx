@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 
 import Layout from "./Layout"
 import About from "./pages/About"
-import History from "./pages/History"
+import Scoreboard from "./pages/Scoreboard"
 import Home from "./pages/Home"
 import PlayPage from "./pages/Play"
 
@@ -13,8 +13,7 @@ const App: React.FC = () => {
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/play" element={<PlayPage />} />
-          <Route path="/scores" element={<History />} />
-          <Route path="/history" element={<History />} />
+          <Route path="/scoreboard" element={<Scoreboard />} />
           <Route path="/about" element={<About />} />
         </Route>
       </Routes>
