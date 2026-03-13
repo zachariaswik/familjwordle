@@ -32,8 +32,11 @@ const Scoreboard: React.FC = () => {
           "linear-gradient(180deg, rgba(45,212,191,0.08) 0%, rgba(255,255,255,1) 40%)",
       }}
     >
-      <Typography variant="h3" color="primary.dark" gutterBottom>
+      <Typography variant="h3" color="primary.dark">
         Scoreboard
+      </Typography>
+      <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+        {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
       </Typography>
 
       {todayScores.length === 0 ? (
@@ -47,7 +50,6 @@ const Scoreboard: React.FC = () => {
               <TableRow>
                 <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Score</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Date</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -55,9 +57,6 @@ const Scoreboard: React.FC = () => {
                 <TableRow key={index}>
                   <TableCell>{record.playerName}</TableCell>
                   <TableCell>{record.guesses}/6</TableCell>
-                  <TableCell>
-                    {new Date(record.date).toLocaleDateString()}
-                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
