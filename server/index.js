@@ -1,50 +1,38 @@
 import cors from "cors"
 import express from "express"
-import fs from "node:fs"
-import path from "node:path"
-import { fileURLToPath } from "node:url"
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+import pg from "pg"
 
 const PORT = Number(process.env.PORT ?? 8787)
-const DATA_DIR = path.join(__dirname, "data")
-const DATA_FILE = path.join(DATA_DIR, "scores.json")
+const DATABASE_URL = process.env.DATABASE_URL
+const { Pool } = pg
 
-function ensureStore() {
-  fs.mkdirSync(DATA_DIR, { recursive: true })
-  if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, "[]", "utf8")
-  }
+if (!DATABASE_URL) {
+  throw new Error("DATABASE_URL is required to start the score API")
 }
 
-function readScores() {
-  ensureStore()
-  try {
-    const raw = fs.readFileSync(DATA_FILE, "utf8")
-    const parsed = JSON.parse(raw)
-    if (!Array.isArray(parsed)) {
-      return []
-    }
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+  ssl:
+    process.env.PGSSLMODE === "require" || process.env.DATABASE_SSL === "true"
+      ? { rejectUnauthorized: false }
+      : undefined,
+})
 
-    return parsed
-      .filter((entry) => {
-        return (
-          typeof entry?.playerName === "string" &&
-          typeof entry?.word === "string" &&
-          typeof entry?.guesses === "number" &&
-          typeof entry?.date === "string"
-        )
-      })
-      .sort((a, b) => b.date.localeCompare(a.date))
-  } catch {
-    return []
-  }
-}
+async function initDb() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS scores (
+      id BIGSERIAL PRIMARY KEY,
+      player_name VARCHAR(50) NOT NULL,
+      word VARCHAR(5) NOT NULL,
+      guesses SMALLINT NOT NULL CHECK (guesses BETWEEN 1 AND 6),
+      played_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `)
 
-function writeScores(scores) {
-  ensureStore()
-  fs.writeFileSync(DATA_FILE, `${JSON.stringify(scores, null, 2)}\n`, "utf8")
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_scores_played_at
+    ON scores (played_at DESC);
+  `)
 }
 
 function normalizeIncomingScore(input) {
@@ -77,7 +65,6 @@ function normalizeIncomingScore(input) {
   }
 
   return {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
     playerName,
     word,
     guesses,
@@ -90,32 +77,83 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-app.get("/api/health", (_req, res) => {
-  res.status(200).json({ status: "ok" })
+app.get("/api/health", async (_req, res) => {
+  try {
+    await pool.query("SELECT 1")
+    res.status(200).json({ status: "ok" })
+  } catch {
+    res.status(500).json({ status: "error" })
+  }
 })
 
-app.get("/api/scores", (_req, res) => {
-  const scores = readScores().map(({ id, ...record }) => record)
-  res.status(200).json(scores)
+app.get("/api/scores", async (_req, res) => {
+  try {
+    const result = await pool.query(
+      `
+        SELECT
+          player_name AS "playerName",
+          word,
+          guesses,
+          played_at AS "date"
+        FROM scores
+        ORDER BY played_at DESC
+      `,
+    )
+
+    res.status(200).json(result.rows)
+  } catch {
+    res.status(500).json({ error: "Unable to load scores" })
+  }
 })
 
-app.post("/api/scores", (req, res) => {
+app.post("/api/scores", async (req, res) => {
   const score = normalizeIncomingScore(req.body)
   if (!score) {
     res.status(400).json({ error: "Invalid score payload" })
     return
   }
 
-  const scores = readScores()
-  scores.push(score)
-  scores.sort((a, b) => b.date.localeCompare(a.date))
-  writeScores(scores)
+  try {
+    const result = await pool.query(
+      `
+        INSERT INTO scores (player_name, word, guesses, played_at)
+        VALUES ($1, $2, $3, $4::timestamptz)
+        RETURNING
+          player_name AS "playerName",
+          word,
+          guesses,
+          played_at AS "date"
+      `,
+      [score.playerName, score.word, score.guesses, score.date],
+    )
 
-  const { id, ...record } = score
-  res.status(201).json(record)
+    res.status(201).json(result.rows[0])
+  } catch {
+    res.status(500).json({ error: "Unable to save score" })
+  }
 })
 
-app.listen(PORT, () => {
+async function start() {
+  await initDb()
+
+  const server = app.listen(PORT, () => {
+    // eslint-disable-next-line no-console
+    console.log(`Score API listening on http://localhost:${PORT}`)
+  })
+
+  const shutdown = async () => {
+    server.close(async () => {
+      await pool.end()
+      process.exit(0)
+    })
+  }
+
+  process.on("SIGINT", shutdown)
+  process.on("SIGTERM", shutdown)
+}
+
+start().catch((error) => {
   // eslint-disable-next-line no-console
-  console.log(`Score API listening on http://localhost:${PORT}`)
+  console.error("Failed to start score API", error)
+  process.exit(1)
 })

@@ -51,7 +51,14 @@ This starts:
 - frontend on `http://localhost:5173`
 - score API on `http://localhost:8787`
 
-The API persists submitted scores in `server/data/scores.json`, so all clients using the same backend will see the same scoreboard.
+The API persists submitted scores in PostgreSQL, so all clients using the same backend/database will see the same scoreboard.
+
+Set these environment variables before running the API:
+
+- `DATABASE_URL` (required), example: `postgres://postgres:postgres@localhost:5432/wordle`
+- `PGSSLMODE=require` for managed PostgreSQL that requires SSL (optional)
+
+The API auto-creates the `scores` table and index on startup.
 
 ### Backend API only
 
