@@ -42,6 +42,8 @@ export default async function handler(req, res) {
           guesses,
           played_at AS "date"
         FROM scores
+        WHERE (played_at AT TIME ZONE 'Europe/Stockholm')::date
+            = (NOW() AT TIME ZONE 'Europe/Stockholm')::date
         ORDER BY played_at DESC
       `)
       return res.status(200).json(result.rows)

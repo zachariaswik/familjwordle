@@ -26,7 +26,7 @@ type Stats = {
 }
 
 // Set to true to restrict play to once per day
-const DAILY_MODE = false
+const DAILY_MODE = true
 
 type StatsContextValue = Stats & {
   hasPlayedToday: boolean
@@ -47,7 +47,7 @@ const defaultStats: Stats = {
 }
 
 function getTodayDate(): string {
-  return new Date().toISOString().slice(0, 10)
+  return new Date().toLocaleDateString("sv-SE")
 }
 
 function normalizeRecord(record: Partial<GameRecord>): GameRecord {
@@ -64,6 +64,7 @@ function loadStats(): Stats {
     const stored = localStorage.getItem(STATS_STORAGE_KEY)
     if (stored) {
       const parsed = JSON.parse(stored) as Partial<Stats>
+      // History is always fetched fresh from the backend, never from cache
       return { ...defaultStats, ...parsed, history: [] }
     }
   } catch {

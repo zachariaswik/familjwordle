@@ -26,8 +26,12 @@ export async function fetchWordList(): Promise<string[]> {
   return words
 }
 
+function todayInSweden(): string {
+  return new Date().toLocaleDateString("sv-SE")
+}
+
 function dayIndex(): number {
-  const today = new Date().toISOString().slice(0, 10)
+  const today = todayInSweden()
   let hash = 0
   for (let i = 0; i < today.length; i++) {
     hash = (hash * 31 + today.charCodeAt(i)) | 0

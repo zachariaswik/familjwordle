@@ -11,8 +11,15 @@ import {
 
 import { useStats } from "../contexts/StatsContext"
 
+function isToday(dateStr: string): boolean {
+  const today = new Date().toLocaleDateString("sv-SE")
+  const scoreDate = new Date(dateStr).toLocaleDateString("sv-SE")
+  return scoreDate === today
+}
+
 const History: React.FC = () => {
   const { history } = useStats()
+  const todayScores = history.filter((r) => isToday(r.date))
 
   return (
     <Paper
@@ -29,7 +36,7 @@ const History: React.FC = () => {
         Scores
       </Typography>
 
-      {history.length === 0 ? (
+      {todayScores.length === 0 ? (
         <Typography variant="body1" color="text.secondary">
           No scores yet. Win a game to see your scoreboard here!
         </Typography>
@@ -45,7 +52,7 @@ const History: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {[...history].reverse().map((record, index) => (
+              {[...todayScores].reverse().map((record, index) => (
                 <TableRow key={index}>
                   <TableCell>{record.playerName}</TableCell>
                   <TableCell
