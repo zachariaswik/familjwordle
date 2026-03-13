@@ -50,15 +50,6 @@ function getTodayDate(): string {
   return new Date().toLocaleDateString("sv-SE")
 }
 
-function normalizeRecord(record: Partial<GameRecord>): GameRecord {
-  return {
-    playerName: record.playerName || "Anonymous",
-    word: record.word ?? "",
-    guesses: record.guesses ?? 0,
-    date: record.date ?? new Date(0).toISOString(),
-  }
-}
-
 function loadStats(): Stats {
   try {
     const stored = localStorage.getItem(STATS_STORAGE_KEY)

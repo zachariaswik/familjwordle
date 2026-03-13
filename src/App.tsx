@@ -2,9 +2,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 
 import Layout from "./Layout"
 import About from "./pages/About"
-import Scoreboard from "./pages/Scoreboard"
 import Home from "./pages/Home"
 import PlayPage from "./pages/Play"
+import Scoreboard from "./pages/Scoreboard"
 
 const App: React.FC = () => {
   return (

@@ -5,10 +5,13 @@ export type ScoreRecord = {
   date: string
 }
 
-const API_BASE_URL = (import.meta.env.VITE_SCORE_API_BASE_URL ?? "").replace(
-  /\/$/,
-  "",
-)
+const env = import.meta.env as { VITE_SCORE_API_BASE_URL?: unknown }
+const scoreApiBaseUrl =
+  typeof env.VITE_SCORE_API_BASE_URL === "string"
+    ? env.VITE_SCORE_API_BASE_URL
+    : ""
+
+const API_BASE_URL = scoreApiBaseUrl.replace(/\/$/, "")
 const SCORES_URL = `${API_BASE_URL}/api/scores`
 
 function isScoreRecord(value: unknown): value is ScoreRecord {

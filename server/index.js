@@ -40,8 +40,12 @@ function normalizeIncomingScore(input) {
     return null
   }
 
-  const playerName = String(input.playerName ?? "").trim().slice(0, 50)
-  const word = String(input.word ?? "").trim().toLowerCase()
+  const playerName = String(input.playerName ?? "")
+    .trim()
+    .slice(0, 50)
+  const word = String(input.word ?? "")
+    .trim()
+    .toLowerCase()
   const guesses = Number(input.guesses)
   const date =
     typeof input.date === "string" && input.date.length > 0
