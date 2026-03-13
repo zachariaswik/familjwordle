@@ -4,7 +4,8 @@
       "Bash(npm run:*)",
       "Bash(npm test:*)",
       "Bash(curl -s http://localhost:5173/src/Layout.tsx)",
-      "Bash(kill 33134)"
+      "Bash(kill 33134)",
+      "Bash(npx prettier:*)"
     ]
   }
 }

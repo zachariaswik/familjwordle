@@ -36,7 +36,11 @@ const Scoreboard: React.FC = () => {
         Scoreboard
       </Typography>
       <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-        {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+        {new Date().toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        })}
       </Typography>
 
       {todayScores.length === 0 ? (
