@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@mui/material"
 
-import { useStats } from "../contexts/StatsContext"
+import { useStats } from "../../../contexts/StatsContext"
 
 function isToday(dateStr: string): boolean {
   const today = new Date().toLocaleDateString("sv-SE")

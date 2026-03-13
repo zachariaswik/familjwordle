@@ -9,10 +9,11 @@ import {
 } from "@mui/material"
 import { useEffect, useState } from "react"
 
-import { useGame } from "./contexts/GameContext"
+import { useGame } from "../../../contexts/GameContext"
+import { useWordDefinition } from "../../../services/useWordService"
+
 import Guesses from "./Guesses"
 import Keyboard from "./Keyboard"
-import { useWordDefinition } from "./services/useWordService"
 
 const Play: React.FC = () => {
   const {

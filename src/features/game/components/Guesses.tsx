@@ -1,7 +1,8 @@
 import cx from "classnames"
 
+import { type Guess, type LetterState } from "../domain/logic"
+
 import styles from "./Guesses.module.css"
-import { type Guess, type LetterState } from "./logic"
 
 const NUM_GUESSES = 6
 const LETTERS_PER_GUESS = 5

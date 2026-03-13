@@ -2,8 +2,7 @@ import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
 import { StatsProvider } from "../contexts/StatsContext"
-
-import Scoreboard from "./Scoreboard"
+import Scoreboard from "../features/scoreboard/pages/Scoreboard"
 
 describe("Scoreboard", () => {
   it("renders empty state when no games played", () => {

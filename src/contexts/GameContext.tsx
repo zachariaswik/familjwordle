@@ -14,7 +14,7 @@ import {
   computeLetterStates,
   createState,
   getLetterState,
-} from "../logic"
+} from "../features/game/domain/logic"
 
 import { useStats } from "./StatsContext"
 

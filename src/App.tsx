@@ -1,10 +1,10 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 
+import Scoreboard from "./features/scoreboard/pages/Scoreboard"
 import Layout from "./Layout"
 import About from "./pages/About"
 import Home from "./pages/Home"
 import PlayPage from "./pages/Play"
-import Scoreboard from "./pages/Scoreboard"
 
 const App: React.FC = () => {
   return (

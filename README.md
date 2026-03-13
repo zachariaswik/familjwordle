@@ -1,113 +1,138 @@
-# Wordle Clone
+# FamiljWordle
 
-A Wordle clone implementation built with React and TypeScript.
+React + TypeScript Wordle-style game with a shared PostgreSQL-backed scoreboard.
 
-## Features
+## Core Features
 
-- **Interface**: Clean, minimal board and keyboard UI
-- **Guess**: Submit 5-letter guesses with real-time feedback
-- **Keyboard**: Visual feedback on all letter states (correct, present, absent)
-- **Guess History**: View all submitted guesses on the board
-- **Logic**: Proper two-pass duplicate-letter handling and color precedence
-- **History State**: Track game progression and letter states
+- Daily five-letter puzzle with keyboard and board feedback
+- Correct duplicate-letter scoring (Wordle-compatible two-pass logic)
+- Shared scoreboard persisted in PostgreSQL and visible to all users
+- Route-level pages for Home, Play, Scoreboard, and About
+- Daily play limit support via feature toggle in `StatsContext`
+
+## Architecture Overview
+
+The app follows a domain-first/hybrid structure:
+
+- `src/pages`: route-level modlets (`Home`, `Play`, `Scoreboard`, `About`)
+- `src/contexts`: app state boundaries (`GameContext`, `StatsContext`)
+- `src/api`: async API modules (`wordApi`, `scoreApi`)
+- `src/services`: hook layer for data-fetching (`useWordService`)
+- `src/components`: shared UI helpers and boundaries
+- `src/logic.ts`: business rules isolated from rendering
+
+This keeps rendering logic, business logic, and state management separated while still making route-level behavior easy to navigate.
 
 ## Project Structure
 
-```
+```text
 src/
-  App.tsx              - Root application component
-  Play.tsx             - Main game component with state management
-  Guesses.tsx          - Board display (6 rows of letters)
-  Keyboard.tsx         - Keyboard UI with key states
-  logic.ts             - Core game logic and state types
-  Guesses.module.css   - Board styling
-  Keyboard.module.css  - Keyboard styling
-  main.tsx             - React entry point
-  index.ts             - Module exports
+  pages/              Route-level modlets and tests
+  contexts/           Shared state providers and tests
+  api/                Async fetch functions and response normalization
+  services/           Hook strategy around TanStack Query
+  components/         Reusable UI/error boundary pieces
+  logic.ts            Core game rules and score computation
 ```
 
-## Installation
+## Prerequisites
+
+- Node.js 20+
+- npm
+- PostgreSQL (for local backend mode)
+
+## Local Setup
 
 ```bash
 npm install
 ```
 
-## Development
+### Frontend only
 
 ```bash
 npm run dev
 ```
 
-Opens the game at `http://localhost:5173`
-
-## Full-Stack Development (Frontend + Score API)
+### Full stack (frontend + API)
 
 ```bash
 npm run dev:full
 ```
 
-This starts:
+- Frontend: `http://localhost:5173`
+- API: `http://localhost:8787`
 
-- frontend on `http://localhost:5173`
-- score API on `http://localhost:8787`
-
-The API persists submitted scores in PostgreSQL, so all clients using the same backend/database will see the same scoreboard.
-
-Set these environment variables before running the API:
-
-- `DATABASE_URL` (required), example: `postgres://postgres:postgres@localhost:5432/wordle`
-- `PGSSLMODE=require` for managed PostgreSQL that requires SSL (optional)
-
-The API auto-creates the `scores` table and index on startup.
-
-### Backend API only
+### API only
 
 ```bash
 npm run start:api
 ```
 
-## Build
+## Environment Variables
+
+Copy `.env.example` and configure values for your environment.
+
+- `DATABASE_URL` (required for backend API)
+- `PGSSLMODE=require` (optional, for hosted DBs that require SSL)
+- `VITE_SCORE_API_BASE_URL` (optional override; defaults to same-origin `/api`)
+
+## Database Notes
+
+- Scores are stored in PostgreSQL.
+- The backend initializes the `scores` table and index on startup.
+
+## Coding Standards
+
+- TypeScript strict typing and explicit core data structures
+- ESLint configured via `eslint.config.js`
+- Prettier configured via `.prettierrc.json`
+- CI enforces lint, tests, and build before merge/deploy
+
+## Quality and DX Commands
 
 ```bash
+npm run lint-typecheck
+npm run lint-eslint
+npm run lint-prettier
+npm run lint-depcheck
+npm test
 npm run build
 ```
 
-Produces optimized build in `dist/`
+## State Management Strategy
 
-## Game Rules
+- `GameContext`: per-game state and win/loss flow
+- `StatsContext`: user stats, daily limit checks, shared score history hydration
 
-- Guess the hidden word in 6 tries
-- Each guess must be a valid 5-letter word (letters only)
-- After each guess, tiles change color:
-  - **Green**: Letter is in the word and in the correct position
-  - **Yellow**: Letter is in the word but in the wrong position
-  - **Gray**: Letter is not in the word
+State leakage safeguards:
 
-## Technical Implementation
+- Context APIs expose only required values/actions
+- Data-fetching and API concerns are kept out of visual components
+- Score history is normalized at API boundaries before entering app state
 
-### State Model
+## Data Fetching Strategy
 
-- `currentGuess`: In-progress guess being typed
-- `guesses`: Array of submitted guesses with computed letter states
-- `word`: Hidden target word
+- Raw HTTP logic lives in `src/api/*`
+- UI consumption uses service hooks in `src/services/useWordService.ts`
+- TanStack Query handles async orchestration, suspense, and cache lifecycle
 
-### Scoring Algorithm
+## CI/CD
 
-Two-pass approach for correctness with duplicate letters:
+- CI workflow: `.github/workflows/ci.yml`
+  - Runs lint, tests, and build on PRs and pushes to `main`
+- CD workflow: `.github/workflows/deploy-vercel.yml`
+  - Deploys to Vercel on push to `main` and supports manual dispatch
 
-1. **Pass 1**: Mark exact position matches (green)
-2. **Pass 2**: Allocate remaining letters as present (yellow) or absent (gray)
+Required GitHub secrets for CD:
 
-### Keyboard Color Precedence
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
 
-For each letter key across all submitted guesses:
+## New Team Member Onboarding
 
-- **Correct** (green) > **Present** (yellow) > **Absent** (gray) > **Unknown** (dark)
-
-## Dependencies
-
-- React 19
-- React DOM 19
-- TypeScript 5.9
-- Vite 7
-- classnames (for conditional CSS classes)
+1. Install dependencies with `npm install`.
+2. Copy `.env.example` and set local values.
+3. Run `npm run dev:full`.
+4. Run `npm run lint` and `npm test` before opening PRs.
+5. Follow existing page-modlet and context boundaries when adding features.

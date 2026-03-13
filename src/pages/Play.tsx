@@ -6,7 +6,7 @@ import ErrorBoundary from "../components/ErrorBoundary"
 import PlayLoadError from "../components/PlayLoadError"
 import { GameProvider } from "../contexts/GameContext"
 import { useStats } from "../contexts/StatsContext"
-import Play from "../Play"
+import Play from "../features/game/components/Play"
 import {
   useDailyWordSuspense,
   useWordListSuspense,

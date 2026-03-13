@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest"
 
 import { GameProvider } from "./contexts/GameContext"
 import { StatsProvider } from "./contexts/StatsContext"
-import Play from "./Play"
+import Play from "./features/game/components/Play"
 
 const defaultValidWords = new Set(["dizzy", "crane", "hello", "world", "abcde"])
 
