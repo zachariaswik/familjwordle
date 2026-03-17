@@ -94,24 +94,27 @@ export const GameProvider: FC<GameProviderProps> = ({
     setGuessError("")
   }, [initialWord])
 
-  const handleChange = useCallback((input: string) => {
-    if (gameStatus !== "playing") return
-    setGuessError("")
+  const handleChange = useCallback(
+    (input: string) => {
+      if (gameStatus !== "playing") return
+      setGuessError("")
 
-    setState((prev) => {
-      if (input === "BACKSPACE") {
-        return { ...prev, currentGuess: prev.currentGuess.slice(0, -1) }
-      } else {
-        if (prev.currentGuess.length < 5) {
-          return {
-            ...prev,
-            currentGuess: prev.currentGuess + input.toLowerCase(),
+      setState((prev) => {
+        if (input === "BACKSPACE") {
+          return { ...prev, currentGuess: prev.currentGuess.slice(0, -1) }
+        } else {
+          if (prev.currentGuess.length < 5) {
+            return {
+              ...prev,
+              currentGuess: prev.currentGuess + input.toLowerCase(),
+            }
           }
+          return prev
         }
-        return prev
-      }
-    })
-  }, [gameStatus])
+      })
+    },
+    [gameStatus],
+  )
 
   const handleSubmit = useCallback((): boolean => {
     if (gameStatus !== "playing") return false
@@ -154,20 +157,23 @@ export const GameProvider: FC<GameProviderProps> = ({
     [state],
   )
 
-  const submitWinnerName = useCallback((name: string) => {
-    const trimmedName = name.trim()
-    if (
-      gameStatus !== "won" ||
-      isWinRecorded ||
-      winningGuessCount === null ||
-      trimmedName.length === 0
-    ) {
-      return
-    }
+  const submitWinnerName = useCallback(
+    (name: string) => {
+      const trimmedName = name.trim()
+      if (
+        gameStatus !== "won" ||
+        isWinRecorded ||
+        winningGuessCount === null ||
+        trimmedName.length === 0
+      ) {
+        return
+      }
 
-    recordWin(trimmedName, state.word, winningGuessCount)
-    setIsWinRecorded(true)
-  }, [gameStatus, isWinRecorded, recordWin, state.word, winningGuessCount])
+      recordWin(trimmedName, state.word, winningGuessCount)
+      setIsWinRecorded(true)
+    },
+    [gameStatus, isWinRecorded, recordWin, state.word, winningGuessCount],
+  )
 
   const stateValue = useMemo(
     () => ({

@@ -2,8 +2,8 @@ import { Box, Paper, Typography } from "@mui/material"
 import { QueryErrorResetBoundary } from "@tanstack/react-query"
 import { Suspense, type FC } from "react"
 
-import { GameProvider } from "@features/game/context/GameContext"
 import Play from "@features/game/components/Play"
+import { GameProvider } from "@features/game/context/GameContext"
 import { useStats } from "@features/stats/context/StatsContext"
 import {
   useDailyWordSuspense,

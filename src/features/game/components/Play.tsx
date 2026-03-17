@@ -9,7 +9,10 @@ import {
 } from "@mui/material"
 import { useEffect, useState } from "react"
 
-import { useGameActions, useGameState } from "@features/game/context/GameContext"
+import {
+  useGameActions,
+  useGameState,
+} from "@features/game/context/GameContext"
 import { useWordDefinition } from "@features/word/hooks/useWordService"
 
 import Guesses from "./Guesses"

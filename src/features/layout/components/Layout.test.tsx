@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom"
 import { describe, expect, it } from "vitest"
 
 import { StatsProvider } from "@features/stats/context/StatsContext"
+
 import Layout from "./Layout"
 
 describe("Layout", () => {

@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 
 import About from "@features/about/pages/About"
-import Home from "@features/home/pages/Home"
 import PlayPage from "@features/game/pages/PlayPage"
+import Home from "@features/home/pages/Home"
 import Layout from "@features/layout/components/Layout"
 import Scoreboard from "@features/scoreboard/pages/Scoreboard"
 

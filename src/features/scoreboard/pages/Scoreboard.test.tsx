@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
 import { StatsProvider } from "@features/stats/context/StatsContext"
+
 import Scoreboard from "./Scoreboard"
 
 describe("Scoreboard", () => {

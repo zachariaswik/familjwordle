@@ -6,6 +6,7 @@ import ReactDOM from "react-dom/client"
 import { StatsProvider } from "@features/stats/context/StatsContext"
 import { queryClient } from "@shared/lib/queryClient"
 import theme from "@shared/theme/theme"
+
 import App from "./App"
 
 const root = document.getElementById("root")
