@@ -9,7 +9,7 @@ import {
   fetchDailyWord,
   fetchWordDefinition,
   fetchWordList,
-} from "../api/wordApi"
+} from "@features/word/api/wordApi"
 
 export const DAILY_WORD_QUERY_KEY = ["daily-word"] as const
 const WORD_LIST_QUERY_KEY = ["word-list"] as const

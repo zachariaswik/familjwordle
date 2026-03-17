@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import Guesses from "./features/game/components/Guesses"
+import Guesses from "./Guesses"
 
 describe("Guesses", () => {
   it("renders empty board", () => {

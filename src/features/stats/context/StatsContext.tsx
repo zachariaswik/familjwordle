@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react"
 
-import { fetchScores, saveScore } from "../api/scoreApi"
+import { fetchScores, saveScore } from "@features/stats/api/scoreApi"
 
 export type GameRecord = {
   playerName: string

@@ -5,7 +5,7 @@ import {
   computeLetterStates,
   createState,
   getLetterState,
-} from "./features/game/domain/logic"
+} from "./logic"
 
 describe("createState", () => {
   it("returns default word", () => {

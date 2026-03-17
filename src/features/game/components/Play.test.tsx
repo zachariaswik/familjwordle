@@ -3,9 +3,9 @@ import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
-import { GameProvider } from "./contexts/GameContext"
-import { StatsProvider } from "./contexts/StatsContext"
-import Play from "./features/game/components/Play"
+import { GameProvider } from "@features/game/context/GameContext"
+import { StatsProvider } from "@features/stats/context/StatsContext"
+import Play from "./Play"
 
 const defaultValidWords = new Set(["dizzy", "crane", "hello", "world", "abcde"])
 

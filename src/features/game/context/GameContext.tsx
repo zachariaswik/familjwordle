@@ -1,7 +1,9 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type FC,
   type ReactNode,
@@ -14,33 +16,54 @@ import {
   computeLetterStates,
   createState,
   getLetterState,
-} from "../features/game/domain/logic"
+} from "@features/game/domain/logic"
 
-import { useStats } from "./StatsContext"
+import { useStats } from "@features/stats/context/StatsContext"
 
 type GameStatus = "playing" | "won" | "lost"
 
-type GameContextValue = {
+type GameStateContextValue = {
   state: State
   gameStatus: GameStatus
   isWinRecorded: boolean
   guessError: string
+}
+
+type GameActionsContextValue = {
   handleChange: (input: string) => void
   handleSubmit: () => boolean
   submitWinnerName: (name: string) => void
   getKeyboardLetterState: (letter: string) => string
 }
 
+type GameContextValue = GameStateContextValue & GameActionsContextValue
+
 const MAX_GUESSES = 6
 
-const GameContext = createContext<GameContextValue | null>(null)
+const GameStateContext = createContext<GameStateContextValue | null>(null)
+const GameActionsContext = createContext<GameActionsContextValue | null>(null)
 
-export const useGame = (): GameContextValue => {
-  const ctx = useContext(GameContext)
+export const useGameState = (): GameStateContextValue => {
+  const ctx = useContext(GameStateContext)
   if (!ctx) {
-    throw new Error("useGame must be used within a GameProvider")
+    throw new Error("useGameState must be used within a GameProvider")
   }
   return ctx
+}
+
+export const useGameActions = (): GameActionsContextValue => {
+  const ctx = useContext(GameActionsContext)
+  if (!ctx) {
+    throw new Error("useGameActions must be used within a GameProvider")
+  }
+  return ctx
+}
+
+export const useGame = (): GameContextValue => {
+  return {
+    ...useGameState(),
+    ...useGameActions(),
+  }
 }
 
 type GameProviderProps = {
@@ -71,7 +94,7 @@ export const GameProvider: FC<GameProviderProps> = ({
     setGuessError("")
   }, [initialWord])
 
-  const handleChange = (input: string) => {
+  const handleChange = useCallback((input: string) => {
     if (gameStatus !== "playing") return
     setGuessError("")
 
@@ -88,9 +111,9 @@ export const GameProvider: FC<GameProviderProps> = ({
         return prev
       }
     })
-  }
+  }, [gameStatus])
 
-  const handleSubmit = (): boolean => {
+  const handleSubmit = useCallback((): boolean => {
     if (gameStatus !== "playing") return false
     if (!checkGuess(state, state.currentGuess)) return false
 
@@ -124,12 +147,14 @@ export const GameProvider: FC<GameProviderProps> = ({
     }
 
     return true
-  }
+  }, [gameStatus, recordLoss, state, validWords])
 
-  const getKeyboardLetterState = (letter: string) =>
-    getLetterState(state, letter)
+  const getKeyboardLetterState = useCallback(
+    (letter: string) => getLetterState(state, letter),
+    [state],
+  )
 
-  const submitWinnerName = (name: string) => {
+  const submitWinnerName = useCallback((name: string) => {
     const trimmedName = name.trim()
     if (
       gameStatus !== "won" ||
@@ -142,22 +167,33 @@ export const GameProvider: FC<GameProviderProps> = ({
 
     recordWin(trimmedName, state.word, winningGuessCount)
     setIsWinRecorded(true)
-  }
+  }, [gameStatus, isWinRecorded, recordWin, state.word, winningGuessCount])
+
+  const stateValue = useMemo(
+    () => ({
+      state,
+      gameStatus,
+      isWinRecorded,
+      guessError,
+    }),
+    [gameStatus, guessError, isWinRecorded, state],
+  )
+
+  const actionsValue = useMemo(
+    () => ({
+      handleChange,
+      handleSubmit,
+      submitWinnerName,
+      getKeyboardLetterState,
+    }),
+    [getKeyboardLetterState, handleChange, handleSubmit, submitWinnerName],
+  )
 
   return (
-    <GameContext.Provider
-      value={{
-        state,
-        gameStatus,
-        isWinRecorded,
-        guessError,
-        handleChange,
-        handleSubmit,
-        submitWinnerName,
-        getKeyboardLetterState,
-      }}
-    >
-      {children}
-    </GameContext.Provider>
+    <GameStateContext.Provider value={stateValue}>
+      <GameActionsContext.Provider value={actionsValue}>
+        {children}
+      </GameActionsContext.Provider>
+    </GameStateContext.Provider>
   )
 }

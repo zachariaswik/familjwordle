@@ -2,15 +2,15 @@ import { Box, Paper, Typography } from "@mui/material"
 import { QueryErrorResetBoundary } from "@tanstack/react-query"
 import { Suspense, type FC } from "react"
 
-import ErrorBoundary from "../components/ErrorBoundary"
-import PlayLoadError from "../components/PlayLoadError"
-import { GameProvider } from "../contexts/GameContext"
-import { useStats } from "../contexts/StatsContext"
-import Play from "../features/game/components/Play"
+import { GameProvider } from "@features/game/context/GameContext"
+import Play from "@features/game/components/Play"
+import { useStats } from "@features/stats/context/StatsContext"
 import {
   useDailyWordSuspense,
   useWordListSuspense,
-} from "../services/useWordService"
+} from "@features/word/hooks/useWordService"
+import ErrorBoundary from "@shared/components/ErrorBoundary"
+import PlayLoadError from "@shared/components/PlayLoadError"
 
 const PlayContent: FC = () => {
   const word = useDailyWordSuspense()
