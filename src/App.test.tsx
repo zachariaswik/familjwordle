@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
+import { StatsProvider } from "@features/stats/context/StatsContext"
 import App from "./App"
-import { StatsProvider } from "./contexts/StatsContext"
 
 describe("App", () => {
   it("renders without crashing", () => {

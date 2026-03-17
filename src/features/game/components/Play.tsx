@@ -9,23 +9,20 @@ import {
 } from "@mui/material"
 import { useEffect, useState } from "react"
 
-import { useGame } from "../../../contexts/GameContext"
-import { useWordDefinition } from "../../../services/useWordService"
+import { useGameActions, useGameState } from "@features/game/context/GameContext"
+import { useWordDefinition } from "@features/word/hooks/useWordService"
 
 import Guesses from "./Guesses"
 import Keyboard from "./Keyboard"
 
 const Play: React.FC = () => {
+  const { state, gameStatus, isWinRecorded, guessError } = useGameState()
   const {
-    state,
-    gameStatus,
-    isWinRecorded,
-    guessError,
     handleChange,
     handleSubmit,
     submitWinnerName,
     getKeyboardLetterState,
-  } = useGame()
+  } = useGameActions()
   const { data: definition, isPending: isDefinitionPending } =
     useWordDefinition(state.word, gameStatus !== "playing")
   const [playerName, setPlayerName] = useState("")

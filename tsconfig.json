@@ -16,7 +16,13 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@features/*": ["src/features/*"],
+      "@shared/*": ["src/shared/*"]
+    }
   },
   "include": ["src", "eslint.config.js", "vite.config.ts"]
 }

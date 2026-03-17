@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import { describe, expect, it } from "vitest"
 
-import { StatsProvider } from "./contexts/StatsContext"
+import { StatsProvider } from "@features/stats/context/StatsContext"
 import Layout from "./Layout"
 
 describe("Layout", () => {

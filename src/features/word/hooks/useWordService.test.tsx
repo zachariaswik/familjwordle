@@ -3,8 +3,8 @@ import { render, screen, waitFor } from "@testing-library/react"
 import { Suspense, type FC } from "react"
 import { describe, expect, it, vi } from "vitest"
 
-import ErrorBoundary from "../components/ErrorBoundary"
-import PlayLoadError from "../components/PlayLoadError"
+import ErrorBoundary from "@shared/components/ErrorBoundary"
+import PlayLoadError from "@shared/components/PlayLoadError"
 
 import { useDailyWordSuspense } from "./useWordService"
 

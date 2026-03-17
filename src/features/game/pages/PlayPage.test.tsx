@@ -2,9 +2,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
-import { StatsProvider } from "../contexts/StatsContext"
+import { StatsProvider } from "@features/stats/context/StatsContext"
 
-import PlayPage from "./Play"
+import PlayPage from "./PlayPage"
 
 const createTestClient = () =>
   new QueryClient({

@@ -3,10 +3,10 @@ import { QueryClientProvider } from "@tanstack/react-query"
 import React from "react"
 import ReactDOM from "react-dom/client"
 
+import { StatsProvider } from "@features/stats/context/StatsContext"
+import { queryClient } from "@shared/lib/queryClient"
+import theme from "@shared/theme/theme"
 import App from "./App"
-import { StatsProvider } from "./contexts/StatsContext"
-import { queryClient } from "./lib/queryClient"
-import theme from "./theme"
 
 const root = document.getElementById("root")
 

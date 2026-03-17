@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import Keyboard from "./features/game/components/Keyboard"
+import Keyboard from "./Keyboard"
 
 describe("Keyboard", () => {
   it("renders all key groups", () => {

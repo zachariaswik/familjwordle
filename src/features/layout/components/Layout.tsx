@@ -9,7 +9,7 @@ import {
 } from "@mui/material"
 import { useNavigate, Outlet } from "react-router-dom"
 
-import { useStats } from "./contexts/StatsContext"
+import { useStats } from "@features/stats/context/StatsContext"
 
 const Layout: React.FC = () => {
   const navigate = useNavigate()
