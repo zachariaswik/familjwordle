@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type FC,
   type ReactNode,
@@ -27,6 +28,7 @@ type GameStateContextValue = {
   gameStatus: GameStatus
   isWinRecorded: boolean
   guessError: string
+  elapsedSeconds: number
 }
 
 type GameActionsContextValue = {
@@ -84,6 +86,8 @@ export const GameProvider: FC<GameProviderProps> = ({
   )
   const [isWinRecorded, setIsWinRecorded] = useState(false)
   const [guessError, setGuessError] = useState("")
+  const [elapsedSeconds, setElapsedSeconds] = useState(0)
+  const startTimeRef = useRef(Date.now())
   const { recordWin, recordLoss } = useStats()
 
   useEffect(() => {
@@ -92,7 +96,17 @@ export const GameProvider: FC<GameProviderProps> = ({
     setWinningGuessCount(null)
     setIsWinRecorded(false)
     setGuessError("")
+    startTimeRef.current = Date.now()
+    setElapsedSeconds(0)
   }, [initialWord])
+
+  useEffect(() => {
+    if (gameStatus !== "playing") return
+    const id = setInterval(() => {
+      setElapsedSeconds(Math.floor((Date.now() - startTimeRef.current) / 1000))
+    }, 1000)
+    return () => clearInterval(id)
+  }, [gameStatus])
 
   const handleChange = useCallback(
     (input: string) => {
@@ -142,6 +156,7 @@ export const GameProvider: FC<GameProviderProps> = ({
     }))
 
     if (isWin) {
+      setElapsedSeconds(Math.floor((Date.now() - startTimeRef.current) / 1000))
       setGameStatus("won")
       setWinningGuessCount(guessCount)
     } else if (isLoss) {
@@ -169,10 +184,17 @@ export const GameProvider: FC<GameProviderProps> = ({
         return
       }
 
-      recordWin(trimmedName, state.word, winningGuessCount)
+      recordWin(trimmedName, state.word, winningGuessCount, elapsedSeconds)
       setIsWinRecorded(true)
     },
-    [gameStatus, isWinRecorded, recordWin, state.word, winningGuessCount],
+    [
+      elapsedSeconds,
+      gameStatus,
+      isWinRecorded,
+      recordWin,
+      state.word,
+      winningGuessCount,
+    ],
   )
 
   const stateValue = useMemo(
@@ -181,8 +203,9 @@ export const GameProvider: FC<GameProviderProps> = ({
       gameStatus,
       isWinRecorded,
       guessError,
+      elapsedSeconds,
     }),
-    [gameStatus, guessError, isWinRecorded, state],
+    [elapsedSeconds, gameStatus, guessError, isWinRecorded, state],
   )
 
   const actionsValue = useMemo(

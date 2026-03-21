@@ -14,6 +14,7 @@ export type GameRecord = {
   word: string
   guesses: number
   date: string
+  timeTakenSeconds?: number
 }
 
 type Stats = {
@@ -30,7 +31,12 @@ const DAILY_MODE = true
 
 type StatsContextValue = Stats & {
   hasPlayedToday: boolean
-  recordWin: (playerName: string, word: string, guesses: number) => void
+  recordWin: (
+    playerName: string,
+    word: string,
+    guesses: number,
+    timeTakenSeconds?: number,
+  ) => void
   recordLoss: () => void
 }
 
@@ -112,12 +118,18 @@ export const StatsProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const hasPlayedToday = DAILY_MODE && stats.lastPlayDate === getTodayDate()
 
-  const recordWin = (playerName: string, word: string, guesses: number) => {
+  const recordWin = (
+    playerName: string,
+    word: string,
+    guesses: number,
+    timeTakenSeconds?: number,
+  ) => {
     const record: GameRecord = {
       playerName,
       word,
       guesses,
       date: new Date().toISOString(),
+      timeTakenSeconds,
     }
 
     setStats((prev) => {

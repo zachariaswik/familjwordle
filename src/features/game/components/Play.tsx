@@ -14,12 +14,14 @@ import {
   useGameState,
 } from "@features/game/context/GameContext"
 import { useWordDefinition } from "@features/word/hooks/useWordService"
+import { formatTime } from "@shared/lib/formatTime"
 
 import Guesses from "./Guesses"
 import Keyboard from "./Keyboard"
 
 const Play: React.FC = () => {
-  const { state, gameStatus, isWinRecorded, guessError } = useGameState()
+  const { state, gameStatus, isWinRecorded, guessError, elapsedSeconds } =
+    useGameState()
   const {
     handleChange,
     handleSubmit,
@@ -66,6 +68,9 @@ const Play: React.FC = () => {
 
   return (
     <>
+      <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+        Time: {formatTime(elapsedSeconds)}
+      </Typography>
       <Guesses guesses={state.guesses} currentGuess={state.currentGuess} />
       {guessError && (
         <Typography
@@ -115,8 +120,11 @@ const Play: React.FC = () => {
       >
         <DialogTitle>You solved it!</DialogTitle>
         <DialogContent>
-          <Typography variant="body1" sx={{ mb: 2 }}>
+          <Typography variant="body1" sx={{ mb: 1 }}>
             Correct guess! Well done, the word is {state.word}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Solved in {formatTime(elapsedSeconds)}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             {isDefinitionPending

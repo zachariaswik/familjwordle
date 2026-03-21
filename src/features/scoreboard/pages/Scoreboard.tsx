@@ -10,6 +10,7 @@ import {
 } from "@mui/material"
 
 import { useStats } from "@features/stats/context/StatsContext"
+import { formatTime } from "@shared/lib/formatTime"
 
 function isToday(dateStr: string): boolean {
   const today = new Date().toLocaleDateString("sv-SE")
@@ -54,6 +55,7 @@ const Scoreboard: React.FC = () => {
               <TableRow>
                 <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Score</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Time</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -61,6 +63,11 @@ const Scoreboard: React.FC = () => {
                 <TableRow key={index}>
                   <TableCell>{record.playerName}</TableCell>
                   <TableCell>{record.guesses}/6</TableCell>
+                  <TableCell>
+                    {record.timeTakenSeconds !== undefined
+                      ? formatTime(record.timeTakenSeconds)
+                      : "—"}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

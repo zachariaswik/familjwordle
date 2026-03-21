@@ -3,6 +3,7 @@ export type ScoreRecord = {
   word: string
   guesses: number
   date: string
+  timeTakenSeconds?: number
 }
 
 const env = import.meta.env as { VITE_SCORE_API_BASE_URL?: unknown }
