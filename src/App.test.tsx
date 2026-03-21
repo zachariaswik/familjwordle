@@ -20,6 +20,6 @@ describe("App", () => {
         <App />
       </StatsProvider>,
     )
-    expect(screen.getByText("Welcome to Wordle")).toBeTruthy()
+    expect(screen.getByText("Welcome! What's your name?")).toBeTruthy()
   })
 })
