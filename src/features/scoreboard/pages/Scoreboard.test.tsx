@@ -127,7 +127,8 @@ describe("Scoreboard", () => {
       makeRecord({ playerName: "Alice", guesses: 3, timeTakenSeconds: 60 }),
     ])
 
-    await screen.findByText("Alice")
+    // Both card and table are in the DOM (CSS-hidden on desktop/mobile respectively)
+    expect((await screen.findAllByText("Alice")).length).toBeGreaterThan(0)
     expect(screen.queryByText("Lucky")).toBeNull()
   })
 
@@ -186,8 +187,9 @@ describe("Scoreboard", () => {
       makeRecord({ playerName: "Bob", guesses: 3, timeTakenSeconds: 30 }),
     ])
 
-    await screen.findByText("Alice")
-    expect(screen.getByText("1")).toBeTruthy()
-    expect(screen.getByText("2")).toBeTruthy()
+    // Both card and table are in the DOM so rank numbers appear twice each
+    expect((await screen.findAllByText("Alice")).length).toBeGreaterThan(0)
+    expect(screen.getAllByText("1").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("2").length).toBeGreaterThan(0)
   })
 })

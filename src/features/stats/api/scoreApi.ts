@@ -48,6 +48,54 @@ export async function fetchScores(): Promise<ScoreRecord[]> {
   return normalized
 }
 
+export type PaginatedScores = {
+  scores: ScoreRecord[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
+function isPaginatedScores(value: unknown): value is PaginatedScores {
+  if (typeof value !== "object" || value === null) {
+    return false
+  }
+  const candidate = value as Record<string, unknown>
+  return (
+    Array.isArray(candidate.scores) &&
+    typeof candidate.total === "number" &&
+    typeof candidate.page === "number" &&
+    typeof candidate.pageSize === "number" &&
+    typeof candidate.totalPages === "number"
+  )
+}
+
+export async function fetchAllTimeScores(
+  page: number,
+  pageSize: number,
+  playerName?: string,
+): Promise<PaginatedScores> {
+  const playerParam =
+    playerName && playerName.trim().length > 0
+      ? `&player=${encodeURIComponent(playerName.trim())}`
+      : ""
+  const url = `${SCORES_URL}?all=true&page=${page}&limit=${pageSize}${playerParam}`
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(
+      `All-time scores request failed with status ${response.status}`,
+    )
+  }
+
+  const payload = (await response.json()) as unknown
+  if (!isPaginatedScores(payload)) {
+    throw new Error("All-time scores response shape is invalid")
+  }
+
+  payload.scores = payload.scores.filter(isScoreRecord)
+  return payload
+}
+
 export async function saveScore(record: ScoreRecord): Promise<ScoreRecord> {
   const response = await fetch(SCORES_URL, {
     method: "POST",

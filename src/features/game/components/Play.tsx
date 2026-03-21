@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Dialog,
   DialogActions,
@@ -15,6 +16,7 @@ import {
 import { usePlayerName } from "@features/player/hooks/usePlayerName"
 import { useWordDefinition } from "@features/word/hooks/useWordService"
 import { formatTime } from "@shared/lib/formatTime"
+import { buildShareText, copyToClipboard } from "@shared/lib/shareResult"
 
 import Guesses from "./Guesses"
 import Keyboard from "./Keyboard"
@@ -33,6 +35,15 @@ const Play: React.FC = () => {
   const { data: definition, isPending: isDefinitionPending } =
     useWordDefinition(state.word, gameStatus !== "playing")
   const [lossDialogOpen, setLossDialogOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const handleShare = () => {
+    const text = buildShareText(state.guesses, state.word, elapsedSeconds)
+    void copyToClipboard(text).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
 
   useEffect(() => {
     if (gameStatus === "playing") {
@@ -118,6 +129,11 @@ const Play: React.FC = () => {
               ? "Loading definition..."
               : (definition ?? "Definition unavailable.")}
           </Typography>
+          <Box sx={{ mt: 1 }}>
+            <Button variant="outlined" size="small" onClick={handleShare}>
+              {copied ? "Copied!" : "Share"}
+            </Button>
+          </Box>
         </>
       )}
       <Dialog
@@ -143,6 +159,9 @@ const Play: React.FC = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
+          <Button variant="outlined" onClick={handleShare} sx={{ mr: "auto" }}>
+            {copied ? "Copied!" : "Share"}
+          </Button>
           <Button variant="contained" onClick={() => submitWinnerName(name)}>
             Save score
           </Button>

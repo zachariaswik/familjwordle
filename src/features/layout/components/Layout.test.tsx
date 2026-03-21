@@ -3,21 +3,24 @@ import { MemoryRouter, Route, Routes } from "react-router-dom"
 import { describe, expect, it } from "vitest"
 
 import { StatsProvider } from "@features/stats/context/StatsContext"
+import { ThemeModeProvider } from "@shared/theme/ThemeContext"
 
 import Layout from "./Layout"
 
 describe("Layout", () => {
   it("renders top navigation and footer", () => {
     render(
-      <StatsProvider>
-        <MemoryRouter initialEntries={["/"]}>
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path="/" element={<div>Home Content</div>} />
-            </Route>
-          </Routes>
-        </MemoryRouter>
-      </StatsProvider>,
+      <ThemeModeProvider>
+        <StatsProvider>
+          <MemoryRouter initialEntries={["/"]}>
+            <Routes>
+              <Route element={<Layout />}>
+                <Route path="/" element={<div>Home Content</div>} />
+              </Route>
+            </Routes>
+          </MemoryRouter>
+        </StatsProvider>
+      </ThemeModeProvider>,
     )
 
     expect(screen.getByText("Wordle")).toBeTruthy()

@@ -18,11 +18,14 @@ import { useState } from "react"
 import { useNavigate, Outlet } from "react-router-dom"
 
 import { useStats } from "@features/stats/context/StatsContext"
+import { useThemeMode } from "@shared/theme/ThemeContext"
 
 const navItems = (hasPlayedToday: boolean) => [
   { label: "Home", path: "/", disabled: false },
   { label: "Play", path: "/play", disabled: hasPlayedToday },
   { label: "Scoreboard", path: "/scoreboard", disabled: false },
+  { label: "All Time", path: "/all-time", disabled: false },
+  { label: "My Stats", path: "/stats", disabled: false },
   { label: "About", path: "/about", disabled: false },
 ]
 
@@ -40,6 +43,7 @@ const HamburgerIcon = () => (
 const Layout: React.FC = () => {
   const navigate = useNavigate()
   const { gamesPlayed, gamesWon, currentStreak, hasPlayedToday } = useStats()
+  const { mode, toggleMode } = useThemeMode()
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const items = navItems(hasPlayedToday)
@@ -99,6 +103,16 @@ const Layout: React.FC = () => {
               </Button>
             ))}
           </Box>
+
+          {/* Dark mode toggle */}
+          <IconButton
+            color="inherit"
+            onClick={toggleMode}
+            aria-label="Toggle dark mode"
+            sx={{ fontSize: "1.25rem" }}
+          >
+            {mode === "dark" ? "☀️" : "🌙"}
+          </IconButton>
 
           {/* Mobile: hamburger button */}
           <IconButton

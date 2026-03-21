@@ -108,7 +108,61 @@ app.get("/api/health", async (_req, res) => {
   }
 })
 
-app.get("/api/scores", async (_req, res) => {
+app.get("/api/scores", async (req, res) => {
+  // All-time paginated scores (sorted by ranking, 1-guess entries excluded)
+  if (req.query.all === "true") {
+    const page = Math.max(1, parseInt(req.query.page ?? "1", 10) || 1)
+    const pageSize = Math.min(
+      100,
+      Math.max(1, parseInt(req.query.limit ?? "20", 10) || 20),
+    )
+    const offset = (page - 1) * pageSize
+    const playerFilter =
+      typeof req.query.player === "string" && req.query.player.trim().length > 0
+        ? req.query.player.trim()
+        : null
+
+    try {
+      const [dataResult, countResult] = await Promise.all([
+        pool.query(
+          `
+          SELECT
+            player_name AS "playerName",
+            word,
+            guesses,
+            played_at AS "date",
+            time_taken_seconds AS "timeTakenSeconds"
+          FROM scores
+          WHERE guesses > 1
+            AND ($3::text IS NULL OR player_name ILIKE $3)
+          ORDER BY (guesses * 1000 + COALESCE(time_taken_seconds, 999)) ASC,
+                   played_at DESC
+          LIMIT $1 OFFSET $2
+          `,
+          [pageSize, offset, playerFilter],
+        ),
+        pool.query(
+          `SELECT COUNT(*)::int AS total FROM scores WHERE guesses > 1
+           AND ($1::text IS NULL OR player_name ILIKE $1)`,
+          [playerFilter],
+        ),
+      ])
+
+      const total = countResult.rows[0]?.total ?? 0
+      res.status(200).json({
+        scores: dataResult.rows,
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      })
+    } catch {
+      res.status(500).json({ error: "Unable to load scores" })
+    }
+    return
+  }
+
+  // Today's scores (existing behaviour)
   try {
     const result = await pool.query(`
       SELECT

@@ -5,9 +5,22 @@ import ReactDOM from "react-dom/client"
 
 import { StatsProvider } from "@features/stats/context/StatsContext"
 import { queryClient } from "@shared/lib/queryClient"
-import theme from "@shared/theme/theme"
+import { createAppTheme } from "@shared/theme/theme"
+import { ThemeModeProvider, useThemeMode } from "@shared/theme/ThemeContext"
 
 import App from "./App"
+
+const DynamicThemeProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { mode } = useThemeMode()
+  return (
+    <ThemeProvider theme={createAppTheme(mode)}>
+      <CssBaseline />
+      {children}
+    </ThemeProvider>
+  )
+}
 
 const root = document.getElementById("root")
 
@@ -18,12 +31,13 @@ if (!root) {
 ReactDOM.createRoot(root).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <StatsProvider>
-          <App />
-        </StatsProvider>
-      </ThemeProvider>
+      <ThemeModeProvider>
+        <DynamicThemeProvider>
+          <StatsProvider>
+            <App />
+          </StatsProvider>
+        </DynamicThemeProvider>
+      </ThemeModeProvider>
     </QueryClientProvider>
   </React.StrictMode>,
 )
