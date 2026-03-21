@@ -19,6 +19,7 @@ import {
   getLetterState,
 } from "@features/game/domain/logic"
 
+import { usePlayerName } from "@features/player/hooks/usePlayerName"
 import { useStats } from "@features/stats/context/StatsContext"
 
 type GameStatus = "playing" | "won" | "lost"
@@ -92,6 +93,7 @@ export const GameProvider: FC<GameProviderProps> = ({
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const startTimeRef = useRef(Date.now())
   const { recordWin, recordLoss } = useStats()
+  const { name: playerName } = usePlayerName()
 
   useEffect(() => {
     setState(createState(initialWord))
@@ -140,6 +142,11 @@ export const GameProvider: FC<GameProviderProps> = ({
 
     if (!validWords.has(state.currentGuess)) {
       setGuessError("Not a valid word")
+      return false
+    }
+
+    if (state.guesses.some((g) => g.text === state.currentGuess)) {
+      setGuessError("Already guessed that word")
       return false
     }
 
@@ -204,9 +211,17 @@ export const GameProvider: FC<GameProviderProps> = ({
 
   const submitLoss = useCallback(() => {
     if (gameStatus !== "lost" || isLossRecorded) return
-    recordLoss()
+    recordLoss(playerName, state.word, state.guesses.length, elapsedSeconds)
     setIsLossRecorded(true)
-  }, [gameStatus, isLossRecorded, recordLoss])
+  }, [
+    elapsedSeconds,
+    gameStatus,
+    isLossRecorded,
+    playerName,
+    recordLoss,
+    state.guesses.length,
+    state.word,
+  ])
 
   const stateValue = useMemo(
     () => ({

@@ -37,7 +37,12 @@ type StatsContextValue = Stats & {
     guesses: number,
     timeTakenSeconds?: number | null,
   ) => void
-  recordLoss: () => void
+  recordLoss: (
+    playerName: string,
+    word: string,
+    guesses: number,
+    timeTakenSeconds?: number | null,
+  ) => void
 }
 
 const STATS_STORAGE_KEY = "wordle-stats"
@@ -162,7 +167,12 @@ export const StatsProvider: FC<{ children: ReactNode }> = ({ children }) => {
     })()
   }
 
-  const recordLoss = () => {
+  const recordLoss = (
+    playerName: string,
+    word: string,
+    guesses: number,
+    timeTakenSeconds?: number | null,
+  ) => {
     setStats((prev) => {
       const updated: Stats = {
         ...prev,
@@ -173,6 +183,22 @@ export const StatsProvider: FC<{ children: ReactNode }> = ({ children }) => {
       saveStats(updated)
       return updated
     })
+
+    void (async () => {
+      try {
+        await saveScore({
+          playerName,
+          word,
+          guesses,
+          date: new Date().toISOString(),
+          timeTakenSeconds,
+        })
+        const history = await fetchScores()
+        setStats((prev) => ({ ...prev, history }))
+      } catch {
+        /* ignore */
+      }
+    })()
   }
 
   return (

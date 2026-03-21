@@ -28,7 +28,7 @@ describe("Home page", () => {
     await user.type(screen.getByLabelText("Your name"), "Erik")
     await user.click(screen.getByRole("button", { name: "Continue" }))
 
-    expect(screen.getByText("Welcome to Cenote Erik!")).toBeTruthy()
+    expect(screen.getByText("Welcome, Erik!")).toBeTruthy()
   })
 
   it("shows personalized welcome when name already stored", () => {
@@ -40,7 +40,7 @@ describe("Home page", () => {
       </MemoryRouter>,
     )
 
-    expect(screen.getByText("Welcome to Cenote Erik!")).toBeTruthy()
+    expect(screen.getByText("Welcome, Erik!")).toBeTruthy()
     expect(screen.queryByText("Welcome! What's your name?")).toBeNull()
   })
 

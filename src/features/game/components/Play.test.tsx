@@ -13,7 +13,15 @@ const GamesPlayedDisplay: React.FC = () => {
   return <span data-testid="games-played">{gamesPlayed}</span>
 }
 
-const defaultValidWords = new Set(["dizzy", "crane", "hello", "world", "abcde"])
+const defaultValidWords = new Set([
+  "dizzy",
+  "crane",
+  "hello",
+  "world",
+  "abcde",
+  "brave",
+  "flask",
+])
 
 const renderPlay = (word = "dizzy", validWords = defaultValidWords) =>
   renderPlayWithClient(word, validWords)
@@ -151,8 +159,9 @@ describe("Play", () => {
 
       renderPlay(word)
 
-      for (let attempt = 0; attempt < 6; attempt += 1) {
-        for (const letter of ["c", "r", "a", "n", "e"]) {
+      const lossGuesses = ["crane", "hello", "world", "abcde", "brave", "flask"]
+      for (const guess of lossGuesses) {
+        for (const letter of guess) {
           await user.click(screen.getByRole("button", { name: letter }))
         }
         await user.click(screen.getByLabelText("Submit guess"))
@@ -187,8 +196,9 @@ describe("Play", () => {
         </StatsProvider>,
       )
 
-      for (let attempt = 0; attempt < 6; attempt += 1) {
-        for (const letter of ["c", "r", "a", "n", "e"]) {
+      const lossGuesses = ["crane", "hello", "world", "abcde", "brave", "flask"]
+      for (const guess of lossGuesses) {
+        for (const letter of guess) {
           await user.click(screen.getByRole("button", { name: letter }))
         }
         await user.click(screen.getByLabelText("Submit guess"))

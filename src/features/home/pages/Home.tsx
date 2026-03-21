@@ -67,7 +67,7 @@ const Home: React.FC = () => {
         }}
       >
         <Typography variant="h3" color="primary.dark" gutterBottom>
-          Welcome to Cenote {name}!
+          Welcome, {name}!
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
           Guess the hidden word in 6 tries. Each guess must be a valid 5-letter
