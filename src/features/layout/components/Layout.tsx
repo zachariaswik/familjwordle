@@ -13,6 +13,7 @@ import {
   ListItemButton,
   ListItemText,
   Divider,
+  useTheme,
 } from "@mui/material"
 import { useState } from "react"
 import { useNavigate, Outlet } from "react-router-dom"
@@ -44,6 +45,7 @@ const Layout: React.FC = () => {
   const navigate = useNavigate()
   const { gamesPlayed, gamesWon, currentStreak, hasPlayedToday } = useStats()
   const { mode, toggleMode } = useThemeMode()
+  const theme = useTheme()
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const items = navItems(hasPlayedToday)
@@ -59,8 +61,7 @@ const Layout: React.FC = () => {
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh",
-        background:
-          "linear-gradient(180deg, rgba(15,118,110,0.1) 0%, rgba(255,255,255,1) 40%)",
+        background: `linear-gradient(180deg, rgba(15,118,110,0.1) 0%, ${theme.palette.background.default} 40%)`,
       }}
     >
       <AppBar position="static" sx={{ background: "#0f766e" }}>
@@ -138,12 +139,12 @@ const Layout: React.FC = () => {
               <Chip
                 label={`${gamesWon}W`}
                 size="small"
-                sx={{ bgcolor: "#0f766e", color: "white" }}
+                sx={{ bgcolor: "primary.main", color: "white" }}
               />
               <Chip
                 label={`${currentStreak} streak`}
                 size="small"
-                sx={{ bgcolor: "#0f766e", color: "white" }}
+                sx={{ bgcolor: "primary.main", color: "white" }}
               />
             </Box>
           )}
@@ -170,7 +171,7 @@ const Layout: React.FC = () => {
         style={{
           textAlign: "center",
           padding: "2rem",
-          color: "#666",
+          color: theme.palette.text.secondary,
           fontSize: "0.875rem",
           marginTop: "auto",
         }}

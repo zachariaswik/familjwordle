@@ -8,6 +8,7 @@ import {
   TableHead,
   TableRow,
   Typography,
+  useTheme,
 } from "@mui/material"
 
 import { type GameRecord } from "@features/stats/context/StatsContext"
@@ -47,6 +48,7 @@ function RankCell({ rank }: { rank: number }) {
 }
 
 const Scoreboard: React.FC = () => {
+  const theme = useTheme()
   const { history } = useStats()
   const rankedScores = history
     .filter((r) => isToday(r.date) && r.guesses > 1)
@@ -69,8 +71,7 @@ const Scoreboard: React.FC = () => {
         p: 4,
         border: "1px solid",
         borderColor: "primary.light",
-        background:
-          "linear-gradient(180deg, rgba(45,212,191,0.08) 0%, rgba(255,255,255,1) 40%)",
+        background: `linear-gradient(180deg, rgba(45,212,191,0.08) 0%, ${theme.palette.background.paper} 40%)`,
       }}
     >
       <Typography variant="h3" color="primary.dark">
@@ -107,9 +108,9 @@ const Scoreboard: React.FC = () => {
                   px: 2,
                   py: 1.5,
                   borderRadius: 2,
-                  bgcolor: "grey.50",
+                  bgcolor: "action.hover",
                   border: "1px solid",
-                  borderColor: "grey.200",
+                  borderColor: "divider",
                 }}
               >
                 <Typography
@@ -207,7 +208,7 @@ const Scoreboard: React.FC = () => {
                     sx={{
                       flex: 1,
                       height: 18,
-                      bgcolor: "grey.100",
+                      bgcolor: "action.selected",
                       borderRadius: 1,
                       overflow: "hidden",
                     }}

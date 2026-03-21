@@ -8,6 +8,7 @@ import {
   Paper,
   TextField,
   Typography,
+  useTheme,
 } from "@mui/material"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
@@ -17,6 +18,7 @@ import { usePlayerName } from "@features/player/hooks/usePlayerName"
 const Home: React.FC = () => {
   const navigate = useNavigate()
   const { name, saveName } = usePlayerName()
+  const theme = useTheme()
   const [inputValue, setInputValue] = useState("")
 
   const handleSaveName = () => {
@@ -61,8 +63,7 @@ const Home: React.FC = () => {
           p: 4,
           border: "1px solid",
           borderColor: "primary.light",
-          background:
-            "linear-gradient(180deg, rgba(45,212,191,0.08) 0%, rgba(255,255,255,1) 40%)",
+          background: `linear-gradient(180deg, rgba(45,212,191,0.08) 0%, ${theme.palette.background.paper} 40%)`,
           textAlign: "center",
         }}
       >

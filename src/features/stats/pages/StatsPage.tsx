@@ -128,7 +128,7 @@ const StatsPage: React.FC = () => {
                     sx={{
                       flex: 1,
                       height: 18,
-                      bgcolor: "grey.100",
+                      bgcolor: "action.selected",
                       borderRadius: 1,
                       overflow: "hidden",
                     }}
@@ -177,9 +177,9 @@ const StatsPage: React.FC = () => {
                     px: 2,
                     py: 1,
                     borderRadius: 1,
-                    bgcolor: "grey.50",
+                    bgcolor: "action.hover",
                     border: "1px solid",
-                    borderColor: "grey.200",
+                    borderColor: "divider",
                     fontSize: "0.875rem",
                   }}
                 >
