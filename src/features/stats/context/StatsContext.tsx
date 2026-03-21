@@ -14,7 +14,7 @@ export type GameRecord = {
   word: string
   guesses: number
   date: string
-  timeTakenSeconds?: number
+  timeTakenSeconds?: number | null
 }
 
 type Stats = {
@@ -35,7 +35,7 @@ type StatsContextValue = Stats & {
     playerName: string,
     word: string,
     guesses: number,
-    timeTakenSeconds?: number,
+    timeTakenSeconds?: number | null,
   ) => void
   recordLoss: () => void
 }
@@ -122,7 +122,7 @@ export const StatsProvider: FC<{ children: ReactNode }> = ({ children }) => {
     playerName: string,
     word: string,
     guesses: number,
-    timeTakenSeconds?: number,
+    timeTakenSeconds?: number | null,
   ) => {
     const record: GameRecord = {
       playerName,

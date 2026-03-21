@@ -25,8 +25,14 @@ async function initDb() {
       player_name VARCHAR(50) NOT NULL,
       word VARCHAR(5) NOT NULL,
       guesses SMALLINT NOT NULL CHECK (guesses BETWEEN 1 AND 6),
-      played_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      played_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      time_taken_seconds INTEGER
     );
+  `)
+
+  // Migrate existing tables that were created before the time column was added.
+  await pool.query(`
+    ALTER TABLE scores ADD COLUMN IF NOT EXISTS time_taken_seconds INTEGER;
   `)
 
   await pool.query(`
@@ -68,11 +74,23 @@ function normalizeIncomingScore(input) {
     return null
   }
 
+  const rawTime = input.timeTakenSeconds
+  const timeTakenSeconds =
+    rawTime !== undefined && rawTime !== null ? Number(rawTime) : null
+
+  if (
+    timeTakenSeconds !== null &&
+    (!Number.isInteger(timeTakenSeconds) || timeTakenSeconds < 0)
+  ) {
+    return null
+  }
+
   return {
     playerName,
     word,
     guesses,
     date,
+    timeTakenSeconds,
   }
 }
 
@@ -97,7 +115,8 @@ app.get("/api/scores", async (_req, res) => {
         player_name AS "playerName",
         word,
         guesses,
-        played_at AS "date"
+        played_at AS "date",
+        time_taken_seconds AS "timeTakenSeconds"
       FROM scores
       WHERE (played_at AT TIME ZONE 'Europe/Stockholm')::date
           = (NOW() AT TIME ZONE 'Europe/Stockholm')::date
@@ -120,15 +139,22 @@ app.post("/api/scores", async (req, res) => {
   try {
     const result = await pool.query(
       `
-        INSERT INTO scores (player_name, word, guesses, played_at)
-        VALUES ($1, $2, $3, $4::timestamptz)
+        INSERT INTO scores (player_name, word, guesses, played_at, time_taken_seconds)
+        VALUES ($1, $2, $3, $4::timestamptz, $5)
         RETURNING
           player_name AS "playerName",
           word,
           guesses,
-          played_at AS "date"
+          played_at AS "date",
+          time_taken_seconds AS "timeTakenSeconds"
       `,
-      [score.playerName, score.word, score.guesses, score.date],
+      [
+        score.playerName,
+        score.word,
+        score.guesses,
+        score.date,
+        score.timeTakenSeconds,
+      ],
     )
 
     res.status(201).json(result.rows[0])

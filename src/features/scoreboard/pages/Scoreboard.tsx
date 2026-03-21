@@ -64,7 +64,7 @@ const Scoreboard: React.FC = () => {
                   <TableCell>{record.playerName}</TableCell>
                   <TableCell>{record.guesses}/6</TableCell>
                   <TableCell>
-                    {record.timeTakenSeconds !== undefined
+                    {record.timeTakenSeconds != null
                       ? formatTime(record.timeTakenSeconds)
                       : "—"}
                   </TableCell>
