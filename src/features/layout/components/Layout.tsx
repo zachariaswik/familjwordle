@@ -1,3 +1,4 @@
+import { useState } from "react"
 import {
   AppBar,
   Container,
@@ -6,14 +7,47 @@ import {
   Box,
   Button,
   Chip,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Divider,
 } from "@mui/material"
 import { useNavigate, Outlet } from "react-router-dom"
 
 import { useStats } from "@features/stats/context/StatsContext"
 
+const navItems = (hasPlayedToday: boolean) => [
+  { label: "Home", path: "/", disabled: false },
+  { label: "Play", path: "/play", disabled: hasPlayedToday },
+  { label: "Scoreboard", path: "/scoreboard", disabled: false },
+  { label: "About", path: "/about", disabled: false },
+]
+
+const HamburgerIcon = () => (
+  <Box sx={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+    {[0, 1, 2].map((i) => (
+      <Box
+        key={i}
+        sx={{ width: 22, height: 2, bgcolor: "white", borderRadius: 1 }}
+      />
+    ))}
+  </Box>
+)
+
 const Layout: React.FC = () => {
   const navigate = useNavigate()
   const { gamesPlayed, gamesWon, currentStreak, hasPlayedToday } = useStats()
+  const [drawerOpen, setDrawerOpen] = useState(false)
+
+  const items = navItems(hasPlayedToday)
+
+  const handleNav = (path: string) => {
+    navigate(path)
+    setDrawerOpen(false)
+  }
 
   return (
     <Box
@@ -34,8 +68,10 @@ const Layout: React.FC = () => {
           >
             Wordle
           </Typography>
+
+          {/* Desktop: stats chips */}
           {gamesPlayed > 0 && (
-            <Box sx={{ display: "flex", gap: 1, mr: 2 }}>
+            <Box sx={{ display: { xs: "none", sm: "flex" }, gap: 1, mr: 2 }}>
               <Chip
                 label={`${gamesWon}W`}
                 size="small"
@@ -48,39 +84,71 @@ const Layout: React.FC = () => {
               />
             </Box>
           )}
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <Button
-              color="inherit"
-              onClick={() => navigate("/")}
-              sx={{ "&:hover": { opacity: 0.8 } }}
-            >
-              Home
-            </Button>
-            <Button
-              color="inherit"
-              disabled={hasPlayedToday}
-              onClick={() => navigate("/play")}
-              sx={{ "&:hover": { opacity: 0.8 } }}
-            >
-              Play
-            </Button>
-            <Button
-              color="inherit"
-              onClick={() => navigate("/scoreboard")}
-              sx={{ "&:hover": { opacity: 0.8 } }}
-            >
-              Scoreboard
-            </Button>
-            <Button
-              color="inherit"
-              onClick={() => navigate("/about")}
-              sx={{ "&:hover": { opacity: 0.8 } }}
-            >
-              About
-            </Button>
+
+          {/* Desktop: nav buttons */}
+          <Box sx={{ display: { xs: "none", sm: "flex" }, gap: 2 }}>
+            {items.map(({ label, path, disabled }) => (
+              <Button
+                key={label}
+                color="inherit"
+                disabled={disabled}
+                onClick={() => navigate(path)}
+                sx={{ "&:hover": { opacity: 0.8 } }}
+              >
+                {label}
+              </Button>
+            ))}
           </Box>
+
+          {/* Mobile: hamburger button */}
+          <IconButton
+            color="inherit"
+            onClick={() => setDrawerOpen(true)}
+            sx={{ display: { xs: "flex", sm: "none" } }}
+            aria-label="Open menu"
+          >
+            <HamburgerIcon />
+          </IconButton>
         </Toolbar>
       </AppBar>
+
+      {/* Mobile drawer */}
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      >
+        <Box sx={{ width: 220, pt: 2 }}>
+          {gamesPlayed > 0 && (
+            <Box sx={{ display: "flex", gap: 1, px: 2, pb: 2 }}>
+              <Chip
+                label={`${gamesWon}W`}
+                size="small"
+                sx={{ bgcolor: "#0f766e", color: "white" }}
+              />
+              <Chip
+                label={`${currentStreak} streak`}
+                size="small"
+                sx={{ bgcolor: "#0f766e", color: "white" }}
+              />
+            </Box>
+          )}
+          <Divider />
+          <List>
+            {items.map(({ label, path, disabled }) => (
+              <ListItem key={label} disablePadding>
+                <ListItemButton
+                  disabled={disabled}
+                  onClick={() => handleNav(path)}
+                >
+                  <ListItemText primary={label} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+      </Drawer>
+
       <Container maxWidth="md" sx={{ py: 4, flexGrow: 1 }}>
         <Outlet />
       </Container>
