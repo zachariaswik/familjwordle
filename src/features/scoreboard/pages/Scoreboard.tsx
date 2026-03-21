@@ -9,8 +9,20 @@ import {
   TableRow,
 } from "@mui/material"
 
+import { type GameRecord } from "@features/stats/context/StatsContext"
 import { useStats } from "@features/stats/context/StatsContext"
 import { formatTime } from "@shared/lib/formatTime"
+
+// Guesses are weighted heavily so fewer guesses always outranks faster time.
+// Null times rank at the bottom of their guess group (value just below the
+// weight so they don't bleed into the next guess bucket).
+const GUESS_WEIGHT = 1000
+const NULL_TIME_PENALTY = GUESS_WEIGHT - 1
+
+export function rankScore(record: GameRecord): number {
+  const time = record.timeTakenSeconds ?? NULL_TIME_PENALTY
+  return record.guesses * GUESS_WEIGHT + time
+}
 
 function isToday(dateStr: string): boolean {
   const today = new Date().toLocaleDateString("sv-SE")
@@ -20,7 +32,9 @@ function isToday(dateStr: string): boolean {
 
 const Scoreboard: React.FC = () => {
   const { history } = useStats()
-  const todayScores = history.filter((r) => isToday(r.date))
+  const rankedScores = history
+    .filter((r) => isToday(r.date) && r.guesses > 1)
+    .sort((a, b) => rankScore(a) - rankScore(b))
 
   return (
     <Paper
@@ -44,7 +58,7 @@ const Scoreboard: React.FC = () => {
         })}
       </Typography>
 
-      {todayScores.length === 0 ? (
+      {rankedScores.length === 0 ? (
         <Typography variant="body1" color="text.secondary">
           No scores yet. Win a game to see your scoreboard here!
         </Typography>
@@ -53,14 +67,16 @@ const Scoreboard: React.FC = () => {
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell sx={{ fontWeight: 700 }}>#</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Score</TableCell>
+                <TableCell sx={{ fontWeight: 700 }}>Guesses</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>Time</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {[...todayScores].reverse().map((record, index) => (
+              {rankedScores.map((record, index) => (
                 <TableRow key={index}>
+                  <TableCell>{index + 1}</TableCell>
                   <TableCell>{record.playerName}</TableCell>
                   <TableCell>{record.guesses}/6</TableCell>
                   <TableCell>
