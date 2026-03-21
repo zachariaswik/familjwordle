@@ -4,9 +4,14 @@ import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
 import { GameProvider } from "@features/game/context/GameContext"
-import { StatsProvider } from "@features/stats/context/StatsContext"
+import { StatsProvider, useStats } from "@features/stats/context/StatsContext"
 
 import Play from "./Play"
+
+const GamesPlayedDisplay: React.FC = () => {
+  const { gamesPlayed } = useStats()
+  return <span data-testid="games-played">{gamesPlayed}</span>
+}
 
 const defaultValidWords = new Set(["dizzy", "crane", "hello", "world", "abcde"])
 
@@ -90,6 +95,7 @@ describe("Play", () => {
 
     it("shows the success message and definition after a correct guess", async () => {
       const user = userEvent.setup()
+      localStorage.setItem("playerName", "Erik")
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => [
@@ -116,8 +122,9 @@ describe("Play", () => {
         screen.getByText("Correct guess! Well done, the word is dizzy"),
       ).toBeTruthy()
       expect(await screen.findByText("A noisy spinning motion.")).toBeTruthy()
+      expect(screen.getByText(/Saving score as:/i)).toBeTruthy()
+      expect(screen.getByText("Erik")).toBeTruthy()
 
-      await user.type(screen.getByLabelText("Your name"), "Erik")
       await user.click(screen.getByRole("button", { name: "Save score" }))
 
       await waitFor(() => {
@@ -151,12 +158,51 @@ describe("Play", () => {
         await user.click(screen.getByLabelText("Submit guess"))
       }
 
-      expect(
-        screen.getByText("Good effort! The right guess is DIZZY."),
-      ).toBeTruthy()
+      expect(screen.getByRole("dialog")).toBeTruthy()
+      expect(screen.getByRole("heading", { name: "Game Over" })).toBeTruthy()
+      expect(screen.getByText(/The word was/i)).toBeTruthy()
+      expect(screen.getByText(/DIZZY/)).toBeTruthy()
       expect(
         await screen.findByText("A wading bird with long legs and neck."),
       ).toBeTruthy()
+    }, 15_000)
+
+    it("records loss only after the Game Over dialog is dismissed", async () => {
+      const user = userEvent.setup()
+
+      render(
+        <StatsProvider>
+          <QueryClientProvider
+            client={
+              new QueryClient({
+                defaultOptions: { queries: { retry: false } },
+              })
+            }
+          >
+            <GameProvider initialWord={word} validWords={defaultValidWords}>
+              <Play />
+            </GameProvider>
+            <GamesPlayedDisplay />
+          </QueryClientProvider>
+        </StatsProvider>,
+      )
+
+      for (let attempt = 0; attempt < 6; attempt += 1) {
+        for (const letter of ["c", "r", "a", "n", "e"]) {
+          await user.click(screen.getByRole("button", { name: letter }))
+        }
+        await user.click(screen.getByLabelText("Submit guess"))
+      }
+
+      // Dialog must be open before the loss is recorded
+      expect(screen.getByRole("dialog")).toBeTruthy()
+      expect(screen.getByTestId("games-played")).toHaveTextContent("0")
+
+      await user.click(screen.getByRole("button", { name: "Got it" }))
+
+      await waitFor(() => {
+        expect(screen.getByTestId("games-played")).toHaveTextContent("1")
+      })
     }, 15_000)
   })
 })

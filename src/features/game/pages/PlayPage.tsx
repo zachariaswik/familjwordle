@@ -1,4 +1,4 @@
-import { Box, Paper, Typography } from "@mui/material"
+import { Box, Chip, Paper, Typography } from "@mui/material"
 import { QueryErrorResetBoundary } from "@tanstack/react-query"
 import { Suspense, type FC } from "react"
 
@@ -41,6 +41,14 @@ const PlayPage: FC = () => {
         <Typography variant="h3" color="primary.dark" gutterBottom>
           Wordle
         </Typography>
+        {import.meta.env.DEV && (
+          <Chip
+            label="Dev mode — unlimited plays enabled"
+            color="warning"
+            size="small"
+            sx={{ mb: 2 }}
+          />
+        )}
         {hasPlayedToday ? (
           <Typography variant="body1" color="text.secondary" sx={{ py: 6 }}>
             You&apos;ve already played today. Come back tomorrow!

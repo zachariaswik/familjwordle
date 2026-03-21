@@ -62,6 +62,22 @@ describe("Play page", () => {
     })
   })
 
+  it("shows dev mode banner and allows unlimited plays", () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(
+        () =>
+          new Promise<never>(() => {
+            // Intentionally unresolved — we only need the banner to render.
+          }),
+      ),
+    )
+
+    renderWithQuery()
+
+    expect(screen.getByText("Dev mode — unlimited plays enabled")).toBeTruthy()
+  })
+
   it("renders load error fallback when fetch fails", async () => {
     vi.stubGlobal(
       "fetch",

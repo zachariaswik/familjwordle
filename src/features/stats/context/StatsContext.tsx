@@ -26,8 +26,8 @@ type Stats = {
   lastPlayDate: string
 }
 
-// Set to true to restrict play to once per day
-const DAILY_MODE = true
+// Restricts play to once per day. Disabled automatically in dev mode.
+const DAILY_MODE = !import.meta.env.DEV
 
 type StatsContextValue = Stats & {
   hasPlayedToday: boolean

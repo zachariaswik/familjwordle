@@ -4,7 +4,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
   Typography,
 } from "@mui/material"
 import { useEffect, useState } from "react"
@@ -13,6 +12,7 @@ import {
   useGameActions,
   useGameState,
 } from "@features/game/context/GameContext"
+import { usePlayerName } from "@features/player/hooks/usePlayerName"
 import { useWordDefinition } from "@features/word/hooks/useWordService"
 import { formatTime } from "@shared/lib/formatTime"
 
@@ -26,17 +26,19 @@ const Play: React.FC = () => {
     handleChange,
     handleSubmit,
     submitWinnerName,
+    submitLoss,
     getKeyboardLetterState,
   } = useGameActions()
+  const { name } = usePlayerName()
   const { data: definition, isPending: isDefinitionPending } =
     useWordDefinition(state.word, gameStatus !== "playing")
-  const [playerName, setPlayerName] = useState("")
-  const [nameError, setNameError] = useState("")
+  const [lossDialogOpen, setLossDialogOpen] = useState(false)
 
   useEffect(() => {
     if (gameStatus === "playing") {
-      setPlayerName("")
-      setNameError("")
+      setLossDialogOpen(false)
+    } else if (gameStatus === "lost") {
+      setLossDialogOpen(true)
     }
   }, [gameStatus])
 
@@ -55,17 +57,6 @@ const Play: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [handleChange, handleSubmit])
 
-  const handleSaveScore = () => {
-    const trimmedName = playerName.trim()
-    if (trimmedName.length === 0) {
-      setNameError("Please enter your name")
-      return
-    }
-
-    setNameError("")
-    submitWinnerName(trimmedName)
-  }
-
   return (
     <>
       <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
@@ -81,22 +72,38 @@ const Play: React.FC = () => {
           {guessError}
         </Typography>
       )}
-      {gameStatus === "lost" && (
-        <>
-          <Typography
-            variant="body1"
-            color="error"
-            sx={{ mt: 2, fontWeight: 600 }}
-          >
-            Good effort! The right guess is {state.word.toUpperCase()}.
+      <Dialog
+        open={lossDialogOpen}
+        maxWidth="xs"
+        fullWidth
+        onClose={() => {
+          submitLoss()
+          setLossDialogOpen(false)
+        }}
+      >
+        <DialogTitle>Game Over</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" sx={{ mb: 1 }}>
+            The word was <strong>{state.word.toUpperCase()}</strong>.
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             {isDefinitionPending
               ? "Loading definition..."
               : (definition ?? "Definition unavailable.")}
           </Typography>
-        </>
-      )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="contained"
+            onClick={() => {
+              submitLoss()
+              setLossDialogOpen(false)
+            }}
+          >
+            Got it
+          </Button>
+        </DialogActions>
+      </Dialog>
       {gameStatus === "won" && isWinRecorded && (
         <>
           <Typography
@@ -123,7 +130,7 @@ const Play: React.FC = () => {
           <Typography variant="body1" sx={{ mb: 1 }}>
             Correct guess! Well done, the word is {state.word}
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             Solved in {formatTime(elapsedSeconds)}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -131,28 +138,12 @@ const Play: React.FC = () => {
               ? "Loading definition..."
               : (definition ?? "Definition unavailable.")}
           </Typography>
-          <TextField
-            autoFocus
-            fullWidth
-            label="Your name"
-            value={playerName}
-            onChange={(event) => {
-              setPlayerName(event.target.value)
-              if (nameError) {
-                setNameError("")
-              }
-            }}
-            error={nameError.length > 0}
-            helperText={nameError}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                handleSaveScore()
-              }
-            }}
-          />
+          <Typography variant="body2" color="text.secondary">
+            Saving score as: <strong>{name}</strong>
+          </Typography>
         </DialogContent>
         <DialogActions>
-          <Button variant="contained" onClick={handleSaveScore}>
+          <Button variant="contained" onClick={() => submitWinnerName(name)}>
             Save score
           </Button>
         </DialogActions>

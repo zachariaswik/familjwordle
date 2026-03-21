@@ -27,6 +27,7 @@ type GameStateContextValue = {
   state: State
   gameStatus: GameStatus
   isWinRecorded: boolean
+  isLossRecorded: boolean
   guessError: string
   elapsedSeconds: number
 }
@@ -35,6 +36,7 @@ type GameActionsContextValue = {
   handleChange: (input: string) => void
   handleSubmit: () => boolean
   submitWinnerName: (name: string) => void
+  submitLoss: () => void
   getKeyboardLetterState: (letter: string) => string
 }
 
@@ -85,6 +87,7 @@ export const GameProvider: FC<GameProviderProps> = ({
     null,
   )
   const [isWinRecorded, setIsWinRecorded] = useState(false)
+  const [isLossRecorded, setIsLossRecorded] = useState(false)
   const [guessError, setGuessError] = useState("")
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const startTimeRef = useRef(Date.now())
@@ -95,6 +98,7 @@ export const GameProvider: FC<GameProviderProps> = ({
     setGameStatus("playing")
     setWinningGuessCount(null)
     setIsWinRecorded(false)
+    setIsLossRecorded(false)
     setGuessError("")
     startTimeRef.current = Date.now()
     setElapsedSeconds(0)
@@ -161,11 +165,12 @@ export const GameProvider: FC<GameProviderProps> = ({
       setWinningGuessCount(guessCount)
     } else if (isLoss) {
       setGameStatus("lost")
-      recordLoss()
+      // recordLoss() is deferred to submitLoss() so PlayPage does not
+      // unmount the game component before the Game Over dialog can open.
     }
 
     return true
-  }, [gameStatus, recordLoss, state, validWords])
+  }, [gameStatus, state, validWords])
 
   const getKeyboardLetterState = useCallback(
     (letter: string) => getLetterState(state, letter),
@@ -197,15 +202,29 @@ export const GameProvider: FC<GameProviderProps> = ({
     ],
   )
 
+  const submitLoss = useCallback(() => {
+    if (gameStatus !== "lost" || isLossRecorded) return
+    recordLoss()
+    setIsLossRecorded(true)
+  }, [gameStatus, isLossRecorded, recordLoss])
+
   const stateValue = useMemo(
     () => ({
       state,
       gameStatus,
       isWinRecorded,
+      isLossRecorded,
       guessError,
       elapsedSeconds,
     }),
-    [elapsedSeconds, gameStatus, guessError, isWinRecorded, state],
+    [
+      elapsedSeconds,
+      gameStatus,
+      guessError,
+      isLossRecorded,
+      isWinRecorded,
+      state,
+    ],
   )
 
   const actionsValue = useMemo(
@@ -213,9 +232,16 @@ export const GameProvider: FC<GameProviderProps> = ({
       handleChange,
       handleSubmit,
       submitWinnerName,
+      submitLoss,
       getKeyboardLetterState,
     }),
-    [getKeyboardLetterState, handleChange, handleSubmit, submitWinnerName],
+    [
+      getKeyboardLetterState,
+      handleChange,
+      handleSubmit,
+      submitLoss,
+      submitWinnerName,
+    ],
   )
 
   return (
