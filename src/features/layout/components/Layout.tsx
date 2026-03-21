@@ -1,4 +1,3 @@
-import { useState } from "react"
 import {
   AppBar,
   Container,
@@ -15,6 +14,7 @@ import {
   ListItemText,
   Divider,
 } from "@mui/material"
+import { useState } from "react"
 import { useNavigate, Outlet } from "react-router-dom"
 
 import { useStats } from "@features/stats/context/StatsContext"
@@ -45,7 +45,7 @@ const Layout: React.FC = () => {
   const items = navItems(hasPlayedToday)
 
   const handleNav = (path: string) => {
-    navigate(path)
+    void navigate(path)
     setDrawerOpen(false)
   }
 
