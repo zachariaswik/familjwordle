@@ -5,7 +5,6 @@ import {
   Typography,
   Box,
   Button,
-  Chip,
   IconButton,
   Drawer,
   List,
@@ -43,7 +42,7 @@ const HamburgerIcon = () => (
 
 const Layout: React.FC = () => {
   const navigate = useNavigate()
-  const { gamesPlayed, gamesWon, currentStreak, hasPlayedToday } = useStats()
+  const { hasPlayedToday } = useStats()
   const { mode, toggleMode } = useThemeMode()
   const theme = useTheme()
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -73,22 +72,6 @@ const Layout: React.FC = () => {
           >
             Wordle
           </Typography>
-
-          {/* Desktop: stats chips */}
-          {gamesPlayed > 0 && (
-            <Box sx={{ display: { xs: "none", sm: "flex" }, gap: 1, mr: 2 }}>
-              <Chip
-                label={`${gamesWon}W`}
-                size="small"
-                sx={{ color: "white", bgcolor: "rgba(255,255,255,0.2)" }}
-              />
-              <Chip
-                label={`${currentStreak} streak`}
-                size="small"
-                sx={{ color: "white", bgcolor: "rgba(255,255,255,0.2)" }}
-              />
-            </Box>
-          )}
 
           {/* Desktop: nav buttons */}
           <Box sx={{ display: { xs: "none", sm: "flex" }, gap: 2 }}>
@@ -134,20 +117,6 @@ const Layout: React.FC = () => {
         onClose={() => setDrawerOpen(false)}
       >
         <Box sx={{ width: 220, pt: 2 }}>
-          {gamesPlayed > 0 && (
-            <Box sx={{ display: "flex", gap: 1, px: 2, pb: 2 }}>
-              <Chip
-                label={`${gamesWon}W`}
-                size="small"
-                sx={{ bgcolor: "primary.main", color: "white" }}
-              />
-              <Chip
-                label={`${currentStreak} streak`}
-                size="small"
-                sx={{ bgcolor: "primary.main", color: "white" }}
-              />
-            </Box>
-          )}
           <Divider />
           <List>
             {items.map(({ label, path, disabled }) => (
