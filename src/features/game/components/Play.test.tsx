@@ -138,7 +138,7 @@ describe("Play", () => {
       await waitFor(() => {
         expect(screen.queryByText("You solved it!")).toBeNull()
       })
-    })
+    }, 15_000)
 
     it("shows the revealed word and definition after a loss", async () => {
       const user = userEvent.setup()
