@@ -13,11 +13,11 @@ describe("buildShareText", () => {
     const guesses: Guess[] = [
       makeGuess("crane", ["correct", "present", "absent", "unknown", "absent"]),
     ]
-    const result = buildShareText(guesses, "crane", 0)
+    const result = buildShareText(guesses, 0)
     expect(result).toContain("🟩🟨⬜⬜⬜")
   })
 
-  it("includes guess count and word in header", () => {
+  it("includes guess count in header without the word", () => {
     const guesses: Guess[] = [
       makeGuess("crane", [
         "correct",
@@ -41,8 +41,9 @@ describe("buildShareText", () => {
         "correct",
       ]),
     ]
-    const result = buildShareText(guesses, "crane", 60)
-    expect(result).toContain("Wordle CRANE 3/6")
+    const result = buildShareText(guesses, 60)
+    expect(result).toContain("Wordle 3/6")
+    expect(result).not.toContain("CRANE")
   })
 
   it("formats time correctly as m:ss", () => {
@@ -55,7 +56,7 @@ describe("buildShareText", () => {
         "correct",
       ]),
     ]
-    const result = buildShareText(guesses, "crane", 102)
+    const result = buildShareText(guesses, 102)
     expect(result).toContain("⏱ 1:42")
   })
 
@@ -69,7 +70,7 @@ describe("buildShareText", () => {
         "correct",
       ]),
     ]
-    const result = buildShareText(guesses, "crane", 65)
+    const result = buildShareText(guesses, 65)
     expect(result).toContain("⏱ 1:05")
   })
 
@@ -83,7 +84,7 @@ describe("buildShareText", () => {
         "unknown",
       ]),
     ]
-    const result = buildShareText(guesses, "crane", 0)
+    const result = buildShareText(guesses, 0)
     expect(result).toContain("⬜⬜⬜⬜⬜")
   })
 
@@ -105,7 +106,7 @@ describe("buildShareText", () => {
         "correct",
       ]),
     ]
-    const result = buildShareText(guesses, "crane", 0)
+    const result = buildShareText(guesses, 0)
     const lines = result.split("\n")
     expect(lines).toContain("⬜⬜⬜⬜⬜")
     expect(lines).toContain("🟨🟨🟨🟨🟨")

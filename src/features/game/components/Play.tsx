@@ -48,7 +48,7 @@ const Play: React.FC = () => {
   const [copied, setCopied] = useState(false)
 
   const handleShare = () => {
-    const text = buildShareText(state.guesses, state.word, elapsedSeconds)
+    const text = buildShareText(state.guesses, elapsedSeconds)
     void copyToClipboard(text).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
