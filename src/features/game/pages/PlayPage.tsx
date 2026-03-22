@@ -1,4 +1,4 @@
-import { Box, Chip, Paper, Typography } from "@mui/material"
+import { Box, Chip, Paper, Typography, useTheme } from "@mui/material"
 import { QueryErrorResetBoundary } from "@tanstack/react-query"
 import { Suspense, type FC } from "react"
 
@@ -25,6 +25,7 @@ const PlayContent: FC = () => {
 
 const PlayPage: FC = () => {
   const { hasPlayedToday } = useStats()
+  const theme = useTheme()
 
   return (
     <Paper
@@ -33,8 +34,7 @@ const PlayPage: FC = () => {
         p: 4,
         border: "1px solid",
         borderColor: "primary.light",
-        background:
-          "linear-gradient(180deg, rgba(45,212,191,0.08) 0%, rgba(255,255,255,1) 40%)",
+        background: `linear-gradient(180deg, rgba(45,212,191,0.08) 0%, ${theme.palette.background.paper} 40%)`,
       }}
     >
       <Box textAlign="center">
