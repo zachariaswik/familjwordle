@@ -56,10 +56,61 @@ describe("fetchWordList", () => {
 })
 
 describe("fetchDailyWord", () => {
-  it("returns a valid 5-letter word", async () => {
-    mockFetchText("dizzy\ncrate\nhello\n")
+  const definitionResponse = {
+    ok: true,
+    json: async () => [
+      {
+        meanings: [
+          { definitions: [{ definition: "A noisy spinning motion." }] },
+        ],
+      },
+    ],
+  }
+
+  it("returns a valid 5-letter word that has a dictionary entry", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          text: async () => "dizzy\ncrate\nhello\n",
+        })
+        .mockResolvedValue(definitionResponse),
+    )
 
     await expect(fetchDailyWord()).resolves.toMatch(/^[a-z]{5}$/)
+  })
+
+  it("skips words without a dictionary entry and uses the next valid word", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          text: async () => "aaaaa\nbbbbb\n",
+        })
+        .mockResolvedValueOnce({ ok: false, status: 404 }) // first word: no definition
+        .mockResolvedValueOnce(definitionResponse), // second word: has definition
+    )
+
+    await expect(fetchDailyWord()).resolves.toMatch(/^[a-z]{5}$/)
+  })
+
+  it("falls back to the seeded word when no definitions are found", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          text: async () => "dizzy\n",
+        })
+        .mockResolvedValue({ ok: false, status: 404 }),
+    )
+
+    await expect(fetchDailyWord()).resolves.toBe("dizzy")
   })
 
   it("propagates fetch/network failures", async () => {

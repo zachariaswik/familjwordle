@@ -40,10 +40,33 @@ function seededRandom(seed: number): number {
   return ((s ^ (s >>> 14)) >>> 0) / 4294967296
 }
 
+async function wordHasDefinition(word: string): Promise<boolean> {
+  try {
+    const response = await fetch(
+      `${WORD_DEFINITION_URL}/${encodeURIComponent(word)}`,
+    )
+    if (!response.ok) return false
+    const payload = (await response.json()) as unknown
+    return extractDefinition(payload) !== null
+  } catch {
+    return false
+  }
+}
+
 export async function fetchDailyWord(): Promise<string> {
   const words = await fetchWordList()
-  const index = Math.floor(seededRandom(todaySeed()) * words.length)
-  return words[index]
+  const startIndex = Math.floor(seededRandom(todaySeed()) * words.length)
+
+  for (let offset = 0; offset < words.length; offset++) {
+    const index = (startIndex + offset) % words.length
+    const word = words[index]
+    if (await wordHasDefinition(word)) {
+      return word
+    }
+  }
+
+  // Fallback: return the seeded word even if no definition was confirmed
+  return words[startIndex]
 }
 
 function extractDefinition(payload: unknown): string | null {
