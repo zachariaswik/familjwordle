@@ -46,6 +46,20 @@ describe("buildShareText", () => {
     expect(result).not.toContain("CRANE")
   })
 
+  it("includes the app URL", () => {
+    const guesses: Guess[] = [
+      makeGuess("crane", [
+        "correct",
+        "correct",
+        "correct",
+        "correct",
+        "correct",
+      ]),
+    ]
+    const result = buildShareText(guesses, 0)
+    expect(result).toContain(window.location.origin)
+  })
+
   it("formats time correctly as m:ss", () => {
     const guesses: Guess[] = [
       makeGuess("crane", [

@@ -21,7 +21,9 @@ export function buildShareText(
     .map((g) => g.letterStates.map((s) => EMOJI[s] ?? "⬜").join(""))
     .join("\n")
 
-  return `Wordle ${guessCount}/6\n\n${grid}\n\n${timeStr}`
+  const appUrl = window.location.origin
+
+  return `Wordle ${guessCount}/6\n\n${grid}\n\n${timeStr}\n${appUrl}`
 }
 
 export async function copyToClipboard(text: string): Promise<void> {
