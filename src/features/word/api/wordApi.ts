@@ -26,22 +26,24 @@ export async function fetchWordList(): Promise<string[]> {
   return words
 }
 
-function todayInSweden(): string {
-  return new Date().toLocaleDateString("sv-SE")
+function todaySeed(): number {
+  // e.g. "2026-03-22" → 20260322
+  const today = new Date().toLocaleDateString("sv-SE")
+  return parseInt(today.replace(/-/g, ""), 10)
 }
 
-function dayIndex(): number {
-  const today = todayInSweden()
-  let hash = 0
-  for (let i = 0; i < today.length; i++) {
-    hash = (hash * 31 + today.charCodeAt(i)) | 0
-  }
-  return Math.abs(hash)
+function seededRandom(seed: number): number {
+  // mulberry32 — fast, good distribution
+  let s = (seed + 0x6d2b79f5) | 0
+  s = Math.imul(s ^ (s >>> 15), 1 | s)
+  s = (s + Math.imul(s ^ (s >>> 7), 61 | s)) ^ s
+  return ((s ^ (s >>> 14)) >>> 0) / 4294967296
 }
 
 export async function fetchDailyWord(): Promise<string> {
   const words = await fetchWordList()
-  return words[dayIndex() % words.length]
+  const index = Math.floor(seededRandom(todaySeed()) * words.length)
+  return words[index]
 }
 
 function extractDefinition(payload: unknown): string | null {
