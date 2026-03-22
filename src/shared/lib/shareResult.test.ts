@@ -13,7 +13,7 @@ describe("buildShareText", () => {
     const guesses: Guess[] = [
       makeGuess("crane", ["correct", "present", "absent", "unknown", "absent"]),
     ]
-    const result = buildShareText(guesses, 0)
+    const result = buildShareText(guesses, 0, 0)
     expect(result).toContain("🟩🟨⬜⬜⬜")
   })
 
@@ -41,7 +41,7 @@ describe("buildShareText", () => {
         "correct",
       ]),
     ]
-    const result = buildShareText(guesses, 60)
+    const result = buildShareText(guesses, 60, 0)
     expect(result).toContain("Wordle 3/6")
     expect(result).not.toContain("CRANE")
   })
@@ -56,7 +56,7 @@ describe("buildShareText", () => {
         "correct",
       ]),
     ]
-    const result = buildShareText(guesses, 0)
+    const result = buildShareText(guesses, 0, 0)
     expect(result).toContain(window.location.origin)
   })
 
@@ -70,7 +70,7 @@ describe("buildShareText", () => {
         "correct",
       ]),
     ]
-    const result = buildShareText(guesses, 102)
+    const result = buildShareText(guesses, 102, 0)
     expect(result).toContain("⏱ 1:42")
   })
 
@@ -84,7 +84,7 @@ describe("buildShareText", () => {
         "correct",
       ]),
     ]
-    const result = buildShareText(guesses, 65)
+    const result = buildShareText(guesses, 65, 0)
     expect(result).toContain("⏱ 1:05")
   })
 
@@ -98,8 +98,36 @@ describe("buildShareText", () => {
         "unknown",
       ]),
     ]
-    const result = buildShareText(guesses, 0)
+    const result = buildShareText(guesses, 0, 0)
     expect(result).toContain("⬜⬜⬜⬜⬜")
+  })
+
+  it("includes hints line when hints were used", () => {
+    const guesses: Guess[] = [
+      makeGuess("crane", [
+        "correct",
+        "correct",
+        "correct",
+        "correct",
+        "correct",
+      ]),
+    ]
+    expect(buildShareText(guesses, 0, 1)).toContain("💡 1 hint used")
+    expect(buildShareText(guesses, 0, 3)).toContain("💡 3 hints used")
+  })
+
+  it("omits hints line when no hints were used", () => {
+    const guesses: Guess[] = [
+      makeGuess("crane", [
+        "correct",
+        "correct",
+        "correct",
+        "correct",
+        "correct",
+      ]),
+    ]
+    const result = buildShareText(guesses, 0, 0)
+    expect(result).not.toContain("hint")
   })
 
   it("produces one emoji row per guess", () => {
@@ -120,7 +148,7 @@ describe("buildShareText", () => {
         "correct",
       ]),
     ]
-    const result = buildShareText(guesses, 0)
+    const result = buildShareText(guesses, 0, 0)
     const lines = result.split("\n")
     expect(lines).toContain("⬜⬜⬜⬜⬜")
     expect(lines).toContain("🟨🟨🟨🟨🟨")

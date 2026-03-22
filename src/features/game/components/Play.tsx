@@ -30,6 +30,7 @@ const Play: React.FC = () => {
     isWinRecorded,
     guessError,
     elapsedSeconds,
+    hintsUsed,
     hintUsedThisRound,
     revealedHints,
   } = useGameState()
@@ -48,7 +49,7 @@ const Play: React.FC = () => {
   const [copied, setCopied] = useState(false)
 
   const handleShare = () => {
-    const text = buildShareText(state.guesses, elapsedSeconds)
+    const text = buildShareText(state.guesses, elapsedSeconds, hintsUsed)
     void copyToClipboard(text).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
