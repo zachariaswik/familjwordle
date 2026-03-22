@@ -11,17 +11,14 @@
 }
 
 .key {
-  display: inline-block;
   min-width: 2em;
   height: 2em;
   padding: 0 0.5em;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #333;
   border-radius: 4px;
   font-weight: bold;
-  color: white;
   text-transform: uppercase;
   cursor: pointer;
   user-select: none;
@@ -29,8 +26,6 @@
 
 .actionKey {
   min-width: 6.5em;
-  background: #4b5563;
-  color: #ffffff;
 }
 
 .key:active {

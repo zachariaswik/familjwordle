@@ -22,14 +22,22 @@ import Guesses from "./Guesses"
 import Keyboard from "./Keyboard"
 
 const Play: React.FC = () => {
-  const { state, gameStatus, isWinRecorded, guessError, elapsedSeconds } =
-    useGameState()
+  const {
+    state,
+    gameStatus,
+    isWinRecorded,
+    guessError,
+    elapsedSeconds,
+    hintUsedThisRound,
+    currentHint,
+  } = useGameState()
   const {
     handleChange,
     handleSubmit,
     submitWinnerName,
     submitLoss,
     getKeyboardLetterState,
+    useHint,
   } = useGameActions()
   const { name } = usePlayerName()
   const { data: definition, isPending: isDefinitionPending } =
@@ -73,7 +81,11 @@ const Play: React.FC = () => {
       <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
         Time: {formatTime(elapsedSeconds)}
       </Typography>
-      <Guesses guesses={state.guesses} currentGuess={state.currentGuess} />
+      <Guesses
+        guesses={state.guesses}
+        currentGuess={state.currentGuess}
+        hintSlot={currentHint}
+      />
       {guessError && (
         <Typography
           variant="body2"
@@ -82,6 +94,19 @@ const Play: React.FC = () => {
         >
           {guessError}
         </Typography>
+      )}
+      {gameStatus === "playing" && (
+        <Box sx={{ mt: 1.5, mb: 0.5 }}>
+          <Button
+            variant="outlined"
+            size="small"
+            disabled={hintUsedThisRound}
+            onClick={useHint}
+            sx={{ textTransform: "none" }}
+          >
+            💡 Hint
+          </Button>
+        </Box>
       )}
       <Dialog
         open={lossDialogOpen}

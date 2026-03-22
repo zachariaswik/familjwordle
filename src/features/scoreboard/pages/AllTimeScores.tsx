@@ -136,6 +136,17 @@ const AllTimeScores: React.FC = () => {
                     <Typography variant="caption">
                       {record.guesses}/6
                     </Typography>
+                    {(record.hintsUsed ?? 0) > 0 && (
+                      <>
+                        <Typography variant="caption">·</Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{ color: "warning.main" }}
+                        >
+                          💡{record.hintsUsed}
+                        </Typography>
+                      </>
+                    )}
                     <Typography variant="caption">·</Typography>
                     <Typography variant="caption">
                       {record.timeTakenSeconds != null
@@ -158,6 +169,7 @@ const AllTimeScores: React.FC = () => {
                   <TableCell sx={{ fontWeight: 700 }}>#</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Guesses</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Hints</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Time</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Date</TableCell>
                 </TableRow>
@@ -173,6 +185,11 @@ const AllTimeScores: React.FC = () => {
                     </TableCell>
                     <TableCell>{record.playerName}</TableCell>
                     <TableCell>{record.guesses}/6</TableCell>
+                    <TableCell>
+                      {(record.hintsUsed ?? 0) > 0
+                        ? `💡 ${record.hintsUsed}`
+                        : "—"}
+                    </TableCell>
                     <TableCell>
                       {record.timeTakenSeconds != null
                         ? formatTime(record.timeTakenSeconds)

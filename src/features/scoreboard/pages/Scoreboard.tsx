@@ -16,14 +16,19 @@ import { useStats } from "@features/stats/context/StatsContext"
 import { formatTime } from "@shared/lib/formatTime"
 
 // Guesses are weighted heavily so fewer guesses always outranks faster time.
-// Null times rank at the bottom of their guess group (value just below the
-// weight so they don't bleed into the next guess bucket).
+// Each hint penalises more than the worst possible no-hint score (6 guesses +
+// max time), so any hint usage ranks below a clean 6-guess finish.
+const HINT_PENALTY = 7000
 const GUESS_WEIGHT = 1000
 const NULL_TIME_PENALTY = GUESS_WEIGHT - 1
 
 export function rankScore(record: GameRecord): number {
   const time = record.timeTakenSeconds ?? NULL_TIME_PENALTY
-  return record.guesses * GUESS_WEIGHT + time
+  return (
+    (record.hintsUsed ?? 0) * HINT_PENALTY +
+    record.guesses * GUESS_WEIGHT +
+    time
+  )
 }
 
 function isToday(dateStr: string): boolean {
@@ -134,6 +139,17 @@ const Scoreboard: React.FC = () => {
                 >
                   {record.guesses}/6
                 </Typography>
+                {(record.hintsUsed ?? 0) > 0 && (
+                  <Typography
+                    sx={{
+                      mr: 2,
+                      color: "warning.main",
+                      fontSize: "0.85rem",
+                    }}
+                  >
+                    💡{record.hintsUsed}
+                  </Typography>
+                )}
                 <Typography
                   sx={{
                     color: "text.secondary",
@@ -158,6 +174,7 @@ const Scoreboard: React.FC = () => {
                   <TableCell sx={{ fontWeight: 700 }}>#</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Guesses</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Hints</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Time</TableCell>
                 </TableRow>
               </TableHead>
@@ -169,6 +186,11 @@ const Scoreboard: React.FC = () => {
                     </TableCell>
                     <TableCell>{record.playerName}</TableCell>
                     <TableCell>{record.guesses}/6</TableCell>
+                    <TableCell>
+                      {(record.hintsUsed ?? 0) > 0
+                        ? `💡 ${record.hintsUsed}`
+                        : "—"}
+                    </TableCell>
                     <TableCell>
                       {record.timeTakenSeconds != null
                         ? formatTime(record.timeTakenSeconds)

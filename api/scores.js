@@ -23,6 +23,10 @@ async function ensureSchema() {
   `)
 
   await pool.query(`
+    ALTER TABLE scores ADD COLUMN IF NOT EXISTS hints_used SMALLINT NOT NULL DEFAULT 0;
+  `)
+
+  await pool.query(`
     CREATE INDEX IF NOT EXISTS idx_scores_played_at
     ON scores (played_at DESC);
   `)
@@ -74,7 +78,15 @@ function normalizeIncomingScore(input) {
     return null
   }
 
-  return { playerName, word, guesses, date, timeTakenSeconds }
+  const rawHints = input.hintsUsed
+  const hintsUsed =
+    rawHints !== undefined && rawHints !== null ? Number(rawHints) : 0
+
+  if (!Number.isInteger(hintsUsed) || hintsUsed < 0) {
+    return null
+  }
+
+  return { playerName, word, guesses, date, timeTakenSeconds, hintsUsed }
 }
 
 export default async function handler(req, res) {
@@ -104,11 +116,12 @@ export default async function handler(req, res) {
               word,
               guesses,
               played_at AS "date",
-              time_taken_seconds AS "timeTakenSeconds"
+              time_taken_seconds AS "timeTakenSeconds",
+              hints_used AS "hintsUsed"
             FROM scores
             WHERE guesses > 1
               AND ($3::text IS NULL OR player_name ILIKE $3)
-            ORDER BY (guesses * 1000 + COALESCE(time_taken_seconds, 999)) ASC,
+            ORDER BY (hints_used * 7000 + guesses * 1000 + COALESCE(time_taken_seconds, 999)) ASC,
                      played_at DESC
             LIMIT $1 OFFSET $2
             `,
@@ -142,7 +155,8 @@ export default async function handler(req, res) {
           word,
           guesses,
           played_at AS "date",
-          time_taken_seconds AS "timeTakenSeconds"
+          time_taken_seconds AS "timeTakenSeconds",
+          hints_used AS "hintsUsed"
         FROM scores
         WHERE (played_at AT TIME ZONE 'Europe/Stockholm')::date
             = (NOW() AT TIME ZONE 'Europe/Stockholm')::date
@@ -163,14 +177,15 @@ export default async function handler(req, res) {
     try {
       const result = await pool.query(
         `
-        INSERT INTO scores (player_name, word, guesses, played_at, time_taken_seconds)
-        VALUES ($1, $2, $3, $4::timestamptz, $5)
+        INSERT INTO scores (player_name, word, guesses, played_at, time_taken_seconds, hints_used)
+        VALUES ($1, $2, $3, $4::timestamptz, $5, $6)
         RETURNING
           player_name AS "playerName",
           word,
           guesses,
           played_at AS "date",
-          time_taken_seconds AS "timeTakenSeconds"
+          time_taken_seconds AS "timeTakenSeconds",
+          hints_used AS "hintsUsed"
         `,
         [
           score.playerName,
@@ -178,6 +193,7 @@ export default async function handler(req, res) {
           score.guesses,
           score.date,
           score.timeTakenSeconds,
+          score.hintsUsed,
         ],
       )
       return res.status(201).json(result.rows[0])

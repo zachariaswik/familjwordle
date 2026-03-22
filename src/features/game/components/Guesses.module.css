@@ -11,15 +11,12 @@
 }
 
 .letter {
-  display: inline-block;
   width: 2em;
   height: 2em;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #333;
   border-radius: 4px;
   font-weight: bold;
-  color: white;
   text-transform: uppercase;
 }

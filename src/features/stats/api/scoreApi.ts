@@ -4,6 +4,7 @@ export type ScoreRecord = {
   guesses: number
   date: string
   timeTakenSeconds?: number | null
+  hintsUsed?: number
 }
 
 const env = import.meta.env as { VITE_SCORE_API_BASE_URL?: unknown }
@@ -28,7 +29,9 @@ function isScoreRecord(value: unknown): value is ScoreRecord {
     typeof candidate.date === "string" &&
     (candidate.timeTakenSeconds === undefined ||
       candidate.timeTakenSeconds === null ||
-      typeof candidate.timeTakenSeconds === "number")
+      typeof candidate.timeTakenSeconds === "number") &&
+    (candidate.hintsUsed === undefined ||
+      typeof candidate.hintsUsed === "number")
   )
 }
 

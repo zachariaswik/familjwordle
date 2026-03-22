@@ -15,6 +15,7 @@ export type GameRecord = {
   guesses: number
   date: string
   timeTakenSeconds?: number | null
+  hintsUsed?: number
 }
 
 type Stats = {
@@ -36,12 +37,14 @@ type StatsContextValue = Stats & {
     word: string,
     guesses: number,
     timeTakenSeconds?: number | null,
+    hintsUsed?: number,
   ) => void
   recordLoss: (
     playerName: string,
     word: string,
     guesses: number,
     timeTakenSeconds?: number | null,
+    hintsUsed?: number,
   ) => void
 }
 
@@ -128,6 +131,7 @@ export const StatsProvider: FC<{ children: ReactNode }> = ({ children }) => {
     word: string,
     guesses: number,
     timeTakenSeconds?: number | null,
+    hintsUsed?: number,
   ) => {
     const record: GameRecord = {
       playerName,
@@ -135,6 +139,7 @@ export const StatsProvider: FC<{ children: ReactNode }> = ({ children }) => {
       guesses,
       date: new Date().toISOString(),
       timeTakenSeconds,
+      hintsUsed: hintsUsed ?? 0,
     }
 
     setStats((prev) => {
@@ -172,6 +177,7 @@ export const StatsProvider: FC<{ children: ReactNode }> = ({ children }) => {
     word: string,
     guesses: number,
     timeTakenSeconds?: number | null,
+    hintsUsed?: number,
   ) => {
     setStats((prev) => {
       const updated: Stats = {
@@ -192,6 +198,7 @@ export const StatsProvider: FC<{ children: ReactNode }> = ({ children }) => {
           guesses,
           date: new Date().toISOString(),
           timeTakenSeconds,
+          hintsUsed: hintsUsed ?? 0,
         })
         const history = await fetchScores()
         setStats((prev) => ({ ...prev, history }))
