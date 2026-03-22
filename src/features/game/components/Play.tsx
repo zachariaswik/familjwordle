@@ -21,6 +21,8 @@ import { buildShareText, copyToClipboard } from "@shared/lib/shareResult"
 import Guesses from "./Guesses"
 import Keyboard from "./Keyboard"
 
+const WORD_LENGTH = 5
+
 const Play: React.FC = () => {
   const {
     state,
@@ -29,7 +31,7 @@ const Play: React.FC = () => {
     guessError,
     elapsedSeconds,
     hintUsedThisRound,
-    currentHint,
+    revealedHints,
   } = useGameState()
   const {
     handleChange,
@@ -76,16 +78,18 @@ const Play: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [handleChange, handleSubmit])
 
+  // Build the _ T _ P _ pattern from accumulated hints.
+  const hintPattern = Array.from({ length: WORD_LENGTH }, (_, i) => {
+    const hint = revealedHints.find((h) => h.position === i)
+    return hint ? hint.letter.toUpperCase() : "_"
+  }).join(" ")
+
   return (
     <>
       <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
         Time: {formatTime(elapsedSeconds)}
       </Typography>
-      <Guesses
-        guesses={state.guesses}
-        currentGuess={state.currentGuess}
-        hintSlot={currentHint}
-      />
+      <Guesses guesses={state.guesses} currentGuess={state.currentGuess} />
       {guessError && (
         <Typography
           variant="body2"
@@ -96,16 +100,38 @@ const Play: React.FC = () => {
         </Typography>
       )}
       {gameStatus === "playing" && (
-        <Box sx={{ mt: 1.5, mb: 0.5 }}>
+        <Box
+          sx={{
+            mt: 1.5,
+            mb: 0.5,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 2,
+          }}
+        >
           <Button
             variant="outlined"
             size="small"
             disabled={hintUsedThisRound}
             onClick={useHint}
-            sx={{ textTransform: "none" }}
+            sx={{ textTransform: "none", flexShrink: 0 }}
           >
             💡 Hint
           </Button>
+          {revealedHints.length > 0 && (
+            <Typography
+              sx={{
+                fontFamily: "monospace",
+                fontSize: "1.25rem",
+                fontWeight: 700,
+                letterSpacing: "0.15em",
+                color: "warning.main",
+              }}
+            >
+              {hintPattern}
+            </Typography>
+          )}
         </Box>
       )}
       <Dialog

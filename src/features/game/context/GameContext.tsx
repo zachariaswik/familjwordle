@@ -38,7 +38,7 @@ type GameStateContextValue = {
   elapsedSeconds: number
   hintsUsed: number
   hintUsedThisRound: boolean
-  currentHint: HintState | null
+  revealedHints: HintState[]
 }
 
 type GameActionsContextValue = {
@@ -86,26 +86,6 @@ type GameProviderProps = {
   children: ReactNode
 }
 
-/**
- * Build the full 5-character guess word by inserting the hint letter at its
- * position among the user-typed characters. Positions not yet filled by the
- * user become a space (which will fail validation, preventing submission).
- */
-function composeWord(guess: string, hint: HintState | null): string {
-  if (!hint) return guess
-  const chars: string[] = []
-  let gIdx = 0
-  for (let i = 0; i < 5; i++) {
-    if (i === hint.position) {
-      chars.push(hint.letter)
-    } else {
-      chars.push(gIdx < guess.length ? guess[gIdx] : " ")
-      gIdx++
-    }
-  }
-  return chars.join("")
-}
-
 export const GameProvider: FC<GameProviderProps> = ({
   initialWord,
   validWords,
@@ -122,9 +102,8 @@ export const GameProvider: FC<GameProviderProps> = ({
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const [hintsUsed, setHintsUsed] = useState(0)
   const [hintUsedThisRound, setHintUsedThisRound] = useState(false)
-  const [currentHint, setCurrentHint] = useState<HintState | null>(null)
-  // All positions revealed by a hint across all rounds — never repeat these.
-  const [hintedPositions, setHintedPositions] = useState<number[]>([])
+  // All hints revealed this game, accumulated across rounds.
+  const [revealedHints, setRevealedHints] = useState<HintState[]>([])
   const startTimeRef = useRef(Date.now())
   const { recordWin, recordLoss } = useStats()
   const { name: playerName } = usePlayerName()
@@ -140,8 +119,7 @@ export const GameProvider: FC<GameProviderProps> = ({
     setElapsedSeconds(0)
     setHintsUsed(0)
     setHintUsedThisRound(false)
-    setCurrentHint(null)
-    setHintedPositions([])
+    setRevealedHints([])
   }, [initialWord])
 
   useEffect(() => {
@@ -157,14 +135,11 @@ export const GameProvider: FC<GameProviderProps> = ({
       if (gameStatus !== "playing") return
       setGuessError("")
 
-      // When a hint is active it occupies one slot, so the user types max 4.
-      const maxLen = currentHint ? 4 : 5
-
       setState((prev) => {
         if (input === "BACKSPACE") {
           return { ...prev, currentGuess: prev.currentGuess.slice(0, -1) }
         } else {
-          if (prev.currentGuess.length < maxLen) {
+          if (prev.currentGuess.length < 5) {
             return {
               ...prev,
               currentGuess: prev.currentGuess + input.toLowerCase(),
@@ -174,30 +149,30 @@ export const GameProvider: FC<GameProviderProps> = ({
         }
       })
     },
-    [gameStatus, currentHint],
+    [gameStatus],
   )
 
   const handleSubmit = useCallback((): boolean => {
     if (gameStatus !== "playing") return false
+    if (!checkGuess(state, state.currentGuess)) return false
 
-    const composed = composeWord(state.currentGuess, currentHint)
-
-    if (!checkGuess(state, composed)) return false
-
-    if (!validWords.has(composed)) {
+    if (!validWords.has(state.currentGuess)) {
       setGuessError("Not a valid word")
       return false
     }
 
-    if (state.guesses.some((g) => g.text === composed)) {
+    if (state.guesses.some((g) => g.text === state.currentGuess)) {
       setGuessError("Already guessed that word")
       return false
     }
 
-    const letterStates = computeLetterStates(state.word, composed)
-    const newGuess: Guess = { text: composed, letterStates }
+    const letterStates = computeLetterStates(state.word, state.currentGuess)
+    const newGuess: Guess = {
+      text: state.currentGuess,
+      letterStates,
+    }
 
-    const isWin = composed === state.word
+    const isWin = state.currentGuess === state.word
     const guessCount = state.guesses.length + 1
     const isLoss = !isWin && guessCount >= MAX_GUESSES
 
@@ -207,8 +182,21 @@ export const GameProvider: FC<GameProviderProps> = ({
       currentGuess: "",
     }))
 
+    // Allow one hint per guess round.
     setHintUsedThisRound(false)
-    setCurrentHint(null)
+
+    // Add every newly confirmed-correct position to the hint display.
+    setRevealedHints((prev) => {
+      const alreadyShown = new Set(prev.map((h) => h.position))
+      const newEntries = letterStates
+        .map((ls, i) =>
+          ls === "correct" ? { position: i, letter: state.word[i] } : null,
+        )
+        .filter(
+          (h): h is HintState => h !== null && !alreadyShown.has(h.position),
+        )
+      return newEntries.length > 0 ? [...prev, ...newEntries] : prev
+    })
 
     if (isWin) {
       setElapsedSeconds(Math.floor((Date.now() - startTimeRef.current) / 1000))
@@ -221,7 +209,7 @@ export const GameProvider: FC<GameProviderProps> = ({
     }
 
     return true
-  }, [gameStatus, state, validWords, currentHint])
+  }, [gameStatus, state, validWords])
 
   const getKeyboardLetterState = useCallback(
     (letter: string) => getLetterState(state, letter),
@@ -231,31 +219,18 @@ export const GameProvider: FC<GameProviderProps> = ({
   const useHint = useCallback(() => {
     if (hintUsedThisRound || gameStatus !== "playing") return
 
-    // Exclude positions already confirmed correct from previous guesses
-    const confirmedPositions = new Set<number>()
-    for (const guess of state.guesses) {
-      guess.letterStates.forEach((ls, i) => {
-        if (ls === "correct") confirmedPositions.add(i)
-      })
-    }
-
-    // Also exclude positions already revealed by a hint earlier in this game
-    const excluded = new Set([...confirmedPositions, ...hintedPositions])
-    const available = [0, 1, 2, 3, 4].filter((i) => !excluded.has(i))
+    // Exclude positions already in the hint display (covers both explicit hints
+    // and positions auto-added from correct guesses).
+    const alreadyShown = new Set(revealedHints.map((h) => h.position))
+    const available = [0, 1, 2, 3, 4].filter((i) => !alreadyShown.has(i))
     if (available.length === 0) return
 
     const position = available[Math.floor(Math.random() * available.length)]
-    setCurrentHint({ position, letter: state.word[position] })
-    setHintedPositions((prev) => [...prev, position])
+    const newHint: HintState = { position, letter: state.word[position] }
+    setRevealedHints((prev) => [...prev, newHint])
     setHintUsedThisRound(true)
     setHintsUsed((prev) => prev + 1)
-  }, [
-    hintUsedThisRound,
-    gameStatus,
-    state.guesses,
-    state.word,
-    hintedPositions,
-  ])
+  }, [hintUsedThisRound, gameStatus, state.word, revealedHints])
 
   const submitWinnerName = useCallback(
     (name: string) => {
@@ -320,10 +295,9 @@ export const GameProvider: FC<GameProviderProps> = ({
       elapsedSeconds,
       hintsUsed,
       hintUsedThisRound,
-      currentHint,
+      revealedHints,
     }),
     [
-      currentHint,
       elapsedSeconds,
       gameStatus,
       guessError,
@@ -331,6 +305,7 @@ export const GameProvider: FC<GameProviderProps> = ({
       hintsUsed,
       isLossRecorded,
       isWinRecorded,
+      revealedHints,
       state,
     ],
   )
