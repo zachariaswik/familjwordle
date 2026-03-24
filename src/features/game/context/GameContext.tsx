@@ -29,6 +29,49 @@ export type HintState = {
   letter: string
 }
 
+// --- Persistence helpers ---
+
+const GAME_STORAGE_KEY = "wordle-game-state"
+
+type PersistedGameState = {
+  word: string
+  guesses: Guess[]
+  gameStatus: GameStatus
+  startTime: number
+  elapsedSeconds: number
+  hintsUsed: number
+  hintUsedThisRound: boolean
+  revealedHints: HintState[]
+  isWinRecorded: boolean
+  isLossRecorded: boolean
+  winningGuessCount: number | null
+}
+
+function loadGameState(word: string): PersistedGameState | null {
+  try {
+    const stored = localStorage.getItem(GAME_STORAGE_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored) as PersistedGameState
+      if (parsed.word === word) {
+        return parsed
+      }
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return null
+}
+
+function saveGameState(state: PersistedGameState): void {
+  try {
+    localStorage.setItem(GAME_STORAGE_KEY, JSON.stringify(state))
+  } catch {
+    // Ignore storage-full errors
+  }
+}
+
+// --- Context types ---
+
 type GameStateContextValue = {
   state: State
   gameStatus: GameStatus
@@ -91,31 +134,88 @@ export const GameProvider: FC<GameProviderProps> = ({
   validWords,
   children,
 }) => {
-  const [state, setState] = useState<State>(() => createState(initialWord))
-  const [gameStatus, setGameStatus] = useState<GameStatus>("playing")
-  const [winningGuessCount, setWinningGuessCount] = useState<number | null>(
-    null,
+  const savedRef = useRef(loadGameState(initialWord))
+  const saved = savedRef.current
+  const isInitialMountRef = useRef(true)
+
+  const [state, setState] = useState<State>(() =>
+    saved
+      ? { word: saved.word, guesses: saved.guesses, currentGuess: "" }
+      : createState(initialWord),
   )
-  const [isWinRecorded, setIsWinRecorded] = useState(false)
-  const [isLossRecorded, setIsLossRecorded] = useState(false)
+  const [gameStatus, setGameStatus] = useState<GameStatus>(
+    () => saved?.gameStatus ?? "playing",
+  )
+  const [winningGuessCount, setWinningGuessCount] = useState<number | null>(
+    () => saved?.winningGuessCount ?? null,
+  )
+  const [isWinRecorded, setIsWinRecorded] = useState(
+    () => saved?.isWinRecorded ?? false,
+  )
+  const [isLossRecorded, setIsLossRecorded] = useState(
+    () => saved?.isLossRecorded ?? false,
+  )
   const [guessError, setGuessError] = useState("")
-  const [elapsedSeconds, setElapsedSeconds] = useState(0)
-  const [hintsUsed, setHintsUsed] = useState(0)
-  const [hintUsedThisRound, setHintUsedThisRound] = useState(false)
-  // All hints revealed this game, accumulated across rounds.
-  const [revealedHints, setRevealedHints] = useState<HintState[]>([])
-  const startTimeRef = useRef(Date.now())
+  const [startTime, setStartTime] = useState(
+    () => saved?.startTime ?? Date.now(),
+  )
+  const [elapsedSeconds, setElapsedSeconds] = useState(() => {
+    if (!saved) return 0
+    if (saved.gameStatus !== "playing") return saved.elapsedSeconds
+    return Math.floor((Date.now() - saved.startTime) / 1000)
+  })
+  const [hintsUsed, setHintsUsed] = useState(() => saved?.hintsUsed ?? 0)
+  const [hintUsedThisRound, setHintUsedThisRound] = useState(
+    () => saved?.hintUsedThisRound ?? false,
+  )
+  const [revealedHints, setRevealedHints] = useState<HintState[]>(
+    () => saved?.revealedHints ?? [],
+  )
   const { recordWin, recordLoss } = useStats()
   const { name: playerName } = usePlayerName()
 
+  // --- Save to localStorage on every persisted-state change ---
   useEffect(() => {
+    saveGameState({
+      word: state.word,
+      guesses: state.guesses,
+      gameStatus,
+      startTime,
+      elapsedSeconds,
+      hintsUsed,
+      hintUsedThisRound,
+      revealedHints,
+      isWinRecorded,
+      isLossRecorded,
+      winningGuessCount,
+    })
+  }, [
+    state.word,
+    state.guesses,
+    gameStatus,
+    startTime,
+    elapsedSeconds,
+    hintsUsed,
+    hintUsedThisRound,
+    revealedHints,
+    isWinRecorded,
+    isLossRecorded,
+    winningGuessCount,
+  ])
+
+  // --- Reset on word change (skip initial mount — initializers already handled it) ---
+  useEffect(() => {
+    if (isInitialMountRef.current) {
+      isInitialMountRef.current = false
+      return
+    }
     setState(createState(initialWord))
     setGameStatus("playing")
     setWinningGuessCount(null)
     setIsWinRecorded(false)
     setIsLossRecorded(false)
     setGuessError("")
-    startTimeRef.current = Date.now()
+    setStartTime(Date.now())
     setElapsedSeconds(0)
     setHintsUsed(0)
     setHintUsedThisRound(false)
@@ -124,11 +224,13 @@ export const GameProvider: FC<GameProviderProps> = ({
 
   useEffect(() => {
     if (gameStatus !== "playing") return
+    // Set immediately so there's no 1-second delay on restore
+    setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000))
     const id = setInterval(() => {
-      setElapsedSeconds(Math.floor((Date.now() - startTimeRef.current) / 1000))
+      setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000))
     }, 1000)
     return () => clearInterval(id)
-  }, [gameStatus])
+  }, [gameStatus, startTime])
 
   const handleChange = useCallback(
     (input: string) => {
@@ -199,7 +301,7 @@ export const GameProvider: FC<GameProviderProps> = ({
     })
 
     if (isWin) {
-      setElapsedSeconds(Math.floor((Date.now() - startTimeRef.current) / 1000))
+      setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000))
       setGameStatus("won")
       setWinningGuessCount(guessCount)
     } else if (isLoss) {
@@ -209,7 +311,7 @@ export const GameProvider: FC<GameProviderProps> = ({
     }
 
     return true
-  }, [gameStatus, state, validWords])
+  }, [gameStatus, state, validWords, startTime])
 
   const getKeyboardLetterState = useCallback(
     (letter: string) => getLetterState(state, letter),
