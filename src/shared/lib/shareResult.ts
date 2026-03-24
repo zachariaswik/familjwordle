@@ -2,7 +2,7 @@ import { type Guess } from "@features/game/domain/logic"
 
 const EMOJI: Record<string, string> = {
   correct: "🟩",
-  present: "🟨",
+  present: "🟧",
   absent: "⬜",
   unknown: "⬜",
 }

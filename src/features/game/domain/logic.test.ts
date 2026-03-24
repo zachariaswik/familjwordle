@@ -97,8 +97,8 @@ describe("getLetterState", () => {
       currentGuess: "",
     }
 
-    expect(getLetterState(state, "n", 0)).toBe("#c9b458")
-    expect(getLetterState(state, "a", 1)).toBe("#c9b458")
+    expect(getLetterState(state, "n", 0)).toBe("#e67e22")
+    expect(getLetterState(state, "a", 1)).toBe("#e67e22")
   })
 
   it("aggregates keyboard state with precedence correct > present > absent", () => {

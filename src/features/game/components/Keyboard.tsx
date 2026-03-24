@@ -8,8 +8,29 @@ const keyboard = [
   ["z", "x", "c", "v", "b", "n", "m"],
 ]
 
-// The color returned by getState() for letters with no information yet.
-const UNKNOWN_BG_LIGHT = "#333333"
+// Colors returned by getState() from the game logic.
+const UNKNOWN_COLOR = "#333333"
+const ABSENT_COLOR = "#787c7e"
+
+function getKeyStyle(
+  stateBg: string,
+  isDark: boolean,
+): { background: string; color: string } {
+  if (stateBg === UNKNOWN_COLOR) {
+    // Untried letter: light neutral background so tried letters stand out.
+    return isDark
+      ? { background: "#818384", color: "white" }
+      : { background: "#d3d6da", color: "#333333" }
+  }
+  if (stateBg === ABSENT_COLOR) {
+    // Tried but not in word: clearly dimmed.
+    return isDark
+      ? { background: "#3a3a3c", color: "#808080" }
+      : { background: "#787c7e", color: "#cccccc" }
+  }
+  // Correct (green) or present (orange): keep as-is with white text.
+  return { background: stateBg, color: "white" }
+}
 
 const Keyboard: React.FC<{
   getState: (letter: string) => string
@@ -19,10 +40,8 @@ const Keyboard: React.FC<{
   const theme = useTheme()
   const isDark = theme.palette.mode === "dark"
 
-  const unknownBg = isDark ? "#818384" : UNKNOWN_BG_LIGHT
   const actionBg = isDark ? "#6b7280" : "#4b5563"
   const borderStyle = isDark ? "1px solid #565758" : "1px solid #333333"
-  const keyColor = "white"
 
   const handleKeyClick = (letter: string) => {
     onChange(letter)
@@ -42,14 +61,12 @@ const Keyboard: React.FC<{
         <div key={index} className={styles.row}>
           {row.map((letter) => {
             const stateBg = getState(letter)
-            // Replace the hardcoded light-mode unknown color with the
-            // theme-appropriate one so keys are visible in dark mode.
-            const bg = stateBg === UNKNOWN_BG_LIGHT ? unknownBg : stateBg
+            const { background, color } = getKeyStyle(stateBg, isDark)
             return (
               <span
                 key={letter}
                 className={styles.key}
-                style={{ background: bg, border: borderStyle, color: keyColor }}
+                style={{ background, border: borderStyle, color }}
                 onClick={() => handleKeyClick(letter)}
                 role="button"
                 tabIndex={0}
@@ -63,7 +80,7 @@ const Keyboard: React.FC<{
       <div className={styles.row}>
         <span
           className={`${styles.key} ${styles.actionKey}`}
-          style={{ background: actionBg, border: borderStyle, color: keyColor }}
+          style={{ background: actionBg, border: borderStyle, color: "white" }}
           onClick={handleEnter}
           role="button"
           tabIndex={0}
@@ -73,7 +90,7 @@ const Keyboard: React.FC<{
         </span>
         <span
           className={`${styles.key} ${styles.actionKey}`}
-          style={{ background: actionBg, border: borderStyle, color: keyColor }}
+          style={{ background: actionBg, border: borderStyle, color: "white" }}
           onClick={handleBackspace}
           role="button"
           tabIndex={0}

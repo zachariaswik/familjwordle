@@ -10,7 +10,7 @@ const LETTERS_PER_GUESS = 5
 
 const stateToColor: Record<LetterState, string> = {
   correct: "#6aaa64",
-  present: "#c9b458",
+  present: "#e67e22",
   absent: "#787c7e",
   unknown: "#333333",
 }

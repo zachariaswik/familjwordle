@@ -13,7 +13,7 @@ export type State = {
 
 const stateToColor: Record<LetterState, string> = {
   correct: "#6aaa64", // Green
-  present: "#c9b458", // Yellow
+  present: "#e67e22", // Orange
   absent: "#787c7e", // Gray
   unknown: "#333333", // Dark
 }

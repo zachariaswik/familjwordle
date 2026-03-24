@@ -102,7 +102,7 @@ const Home: React.FC = () => {
             sx={{
               width: 40,
               height: 40,
-              bgcolor: "#c9b458",
+              bgcolor: "#e67e22",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -111,10 +111,10 @@ const Home: React.FC = () => {
               fontWeight: "bold",
             }}
           >
-            Y
+            O
           </Box>
           <Typography variant="body2" sx={{ alignSelf: "center" }}>
-            Yellow = Right letter, wrong position
+            Orange = Right letter, wrong position
           </Typography>
         </Box>
         <Box sx={{ display: "flex", gap: 1, justifyContent: "center", mb: 4 }}>

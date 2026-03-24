@@ -14,7 +14,7 @@ describe("buildShareText", () => {
       makeGuess("crane", ["correct", "present", "absent", "unknown", "absent"]),
     ]
     const result = buildShareText(guesses, 0, 0)
-    expect(result).toContain("🟩🟨⬜⬜⬜")
+    expect(result).toContain("🟩🟧⬜⬜⬜")
   })
 
   it("includes guess count in header without the word", () => {
@@ -151,7 +151,7 @@ describe("buildShareText", () => {
     const result = buildShareText(guesses, 0, 0)
     const lines = result.split("\n")
     expect(lines).toContain("⬜⬜⬜⬜⬜")
-    expect(lines).toContain("🟨🟨🟨🟨🟨")
+    expect(lines).toContain("🟧🟧🟧🟧🟧")
     expect(lines).toContain("🟩🟩🟩🟩🟩")
   })
 })
