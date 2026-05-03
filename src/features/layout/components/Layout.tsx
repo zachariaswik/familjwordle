@@ -17,8 +17,32 @@ import {
 import { useState } from "react"
 import { useNavigate, Outlet } from "react-router-dom"
 
+import { type Guess } from "@features/game/domain/logic"
 import { useStats } from "@features/stats/context/StatsContext"
+import { buildShareText, copyToClipboard } from "@shared/lib/shareResult"
 import { useThemeMode } from "@shared/theme/ThemeContext"
+
+const GAME_STORAGE_KEY = "wordle-game-state"
+
+type StoredGameState = {
+  gameStatus: "playing" | "won" | "lost"
+  guesses: Guess[]
+  elapsedSeconds: number
+  hintsUsed: number
+}
+
+function readCompletedGame(): StoredGameState | null {
+  try {
+    const stored = localStorage.getItem(GAME_STORAGE_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored) as StoredGameState
+      if (parsed.gameStatus !== "playing") return parsed
+    }
+  } catch {
+    // ignore
+  }
+  return null
+}
 
 const navItems = (hasPlayedToday: boolean) => [
   { label: "Home", path: "/", disabled: false },
@@ -46,12 +70,28 @@ const Layout: React.FC = () => {
   const { mode, toggleMode } = useThemeMode()
   const theme = useTheme()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   const items = navItems(hasPlayedToday)
 
   const handleNav = (path: string) => {
     void navigate(path)
     setDrawerOpen(false)
+  }
+
+  const canShare = hasPlayedToday || readCompletedGame() !== null
+
+  const handleShare = async () => {
+    const game = readCompletedGame()
+    if (!game) return
+    const text = buildShareText(
+      game.guesses,
+      game.elapsedSeconds,
+      game.hintsUsed,
+    )
+    await copyToClipboard(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
@@ -87,6 +127,17 @@ const Layout: React.FC = () => {
               </Button>
             ))}
           </Box>
+
+          {/* Share today's result */}
+          {canShare && (
+            <Button
+              color="inherit"
+              onClick={() => void handleShare()}
+              sx={{ minWidth: 0, textTransform: "none", fontWeight: 600 }}
+            >
+              {copied ? "Copied!" : "Share"}
+            </Button>
+          )}
 
           {/* Dark mode toggle */}
           <IconButton

@@ -1,66 +1,155 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cenote — Privacy Policy</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      max-width: 720px;
-      margin: 60px auto;
-      padding: 0 24px;
-      color: #1a1a1a;
-      line-height: 1.7;
-    }
-    h1 { font-size: 1.6rem; margin-bottom: 4px; }
-    h2 { font-size: 1.1rem; margin-top: 2rem; }
-    p, li { font-size: 0.97rem; }
-    .updated { color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
-    a { color: #2563eb; }
-  </style>
-</head>
-<body>
-  <h1>Privacy Policy — Cenote</h1>
-  <p class="updated">Last updated: May 2, 2026</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cenote — Privacy Policy</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        max-width: 720px;
+        margin: 60px auto;
+        padding: 0 24px;
+        color: #1a1a1a;
+        line-height: 1.7;
+      }
+      h1 {
+        font-size: 1.6rem;
+        margin-bottom: 4px;
+      }
+      h2 {
+        font-size: 1.1rem;
+        margin-top: 2rem;
+      }
+      p,
+      li {
+        font-size: 0.97rem;
+      }
+      .updated {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+      }
+      a {
+        color: #2563eb;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Privacy Policy — Cenote</h1>
+    <p class="updated">Last updated: May 2, 2026</p>
 
-  <p>Cenote is a Chrome extension that helps you focus by blocking distracting websites during timed study sessions. This policy explains what data the extension accesses, how it is used, and what is never collected.</p>
+    <p>
+      Cenote is a Chrome extension that helps you focus by blocking distracting
+      websites during timed study sessions. This policy explains what data the
+      extension accesses, how it is used, and what is never collected.
+    </p>
 
-  <h2>Data We Do Not Collect</h2>
-  <p>Cenote does not collect, transmit, or share any personal data with any server or third party. There are no accounts, no analytics, no ads, and no external network requests made by the extension.</p>
+    <h2>Data We Do Not Collect</h2>
+    <p>
+      Cenote does not collect, transmit, or share any personal data with any
+      server or third party. There are no accounts, no analytics, no ads, and no
+      external network requests made by the extension.
+    </p>
 
-  <h2>Data Stored Locally</h2>
-  <p>Cenote stores the following data exclusively on your device using the Chrome Storage API:</p>
-  <ul>
-    <li><strong>Focus sessions</strong> — names, allowed-site lists, and creation dates you define</li>
-    <li><strong>Blocked domains</strong> — the list of sites you have chosen to block</li>
-    <li><strong>Tab stash</strong> — a snapshot of your open tabs taken at session start, used to restore tabs when the session ends. This is stored in <code>chrome.storage.local</code> and cleared after restoration.</li>
-    <li><strong>Time tracking data</strong> — per-domain time spent during a session, held in <code>chrome.storage.session</code> and cleared when the browser closes</li>
-    <li><strong>Settings</strong> — your countdown timer preferences and other UI settings</li>
-  </ul>
+    <h2>Data Stored Locally</h2>
+    <p>
+      Cenote stores the following data exclusively on your device using the
+      Chrome Storage API:
+    </p>
+    <ul>
+      <li>
+        <strong>Focus sessions</strong> — names, allowed-site lists, and
+        creation dates you define
+      </li>
+      <li>
+        <strong>Blocked domains</strong> — the list of sites you have chosen to
+        block
+      </li>
+      <li>
+        <strong>Tab stash</strong> — a snapshot of your open tabs taken at
+        session start, used to restore tabs when the session ends. This is
+        stored in <code>chrome.storage.local</code> and cleared after
+        restoration.
+      </li>
+      <li>
+        <strong>Time tracking data</strong> — per-domain time spent during a
+        session, held in <code>chrome.storage.session</code> and cleared when
+        the browser closes
+      </li>
+      <li>
+        <strong>Settings</strong> — your countdown timer preferences and other
+        UI settings
+      </li>
+    </ul>
 
-  <h2>Chrome Sync</h2>
-  <p>If you have Chrome Sync enabled, your focus sessions and blocklist are synced across your own Chrome instances via <code>chrome.storage.sync</code>. This data is managed entirely by Google and subject to <a href="https://policies.google.com/privacy" target="_blank">Google's Privacy Policy</a>. Favicons are stripped before syncing to stay within Chrome's sync quota.</p>
+    <h2>Chrome Sync</h2>
+    <p>
+      If you have Chrome Sync enabled, your focus sessions and blocklist are
+      synced across your own Chrome instances via
+      <code>chrome.storage.sync</code>. This data is managed entirely by Google
+      and subject to
+      <a href="https://policies.google.com/privacy" target="_blank"
+        >Google's Privacy Policy</a
+      >. Favicons are stripped before syncing to stay within Chrome's sync
+      quota.
+    </p>
 
-  <h2>Permissions</h2>
-  <p>Cenote requests the following Chrome permissions and uses them solely for the features described:</p>
-  <ul>
-    <li><strong>declarativeNetRequest / host_permissions (&lt;all_urls&gt;)</strong> — to install and manage site-blocking rules</li>
-    <li><strong>tabs / windows</strong> — to stash and restore your open tabs around focus sessions and to detect the site you're currently viewing in the popup</li>
-    <li><strong>storage</strong> — to persist your sessions, blocklist, and settings locally and via Chrome Sync</li>
-    <li><strong>scripting / activeTab</strong> — to inject the session navigation guard (tab strip and keyboard intercept) during a focus session</li>
-    <li><strong>alarms</strong> — to fire a periodic heartbeat that persists time-tracker state while the service worker is alive</li>
-    <li><strong>notifications</strong> — reserved for future session reminder features; not currently used</li>
-    <li><strong>idle</strong> — to pause time tracking when you step away from the computer</li>
-  </ul>
+    <h2>Permissions</h2>
+    <p>
+      Cenote requests the following Chrome permissions and uses them solely for
+      the features described:
+    </p>
+    <ul>
+      <li>
+        <strong
+          >declarativeNetRequest / host_permissions (&lt;all_urls&gt;)</strong
+        >
+        — to install and manage site-blocking rules
+      </li>
+      <li>
+        <strong>tabs / windows</strong> — to stash and restore your open tabs
+        around focus sessions and to detect the site you're currently viewing in
+        the popup
+      </li>
+      <li>
+        <strong>storage</strong> — to persist your sessions, blocklist, and
+        settings locally and via Chrome Sync
+      </li>
+      <li>
+        <strong>scripting / activeTab</strong> — to inject the session
+        navigation guard (tab strip and keyboard intercept) during a focus
+        session
+      </li>
+      <li>
+        <strong>alarms</strong> — to fire a periodic heartbeat that persists
+        time-tracker state while the service worker is alive
+      </li>
+      <li>
+        <strong>notifications</strong> — reserved for future session reminder
+        features; not currently used
+      </li>
+      <li>
+        <strong>idle</strong> — to pause time tracking when you step away from
+        the computer
+      </li>
+    </ul>
 
-  <h2>Children's Privacy</h2>
-  <p>Cenote does not collect any data from anyone, including children under 13.</p>
+    <h2>Children's Privacy</h2>
+    <p>
+      Cenote does not collect any data from anyone, including children under 13.
+    </p>
 
-  <h2>Changes to This Policy</h2>
-  <p>If this policy changes, the updated version will be posted here with a new "Last updated" date.</p>
+    <h2>Changes to This Policy</h2>
+    <p>
+      If this policy changes, the updated version will be posted here with a new
+      "Last updated" date.
+    </p>
 
-  <h2>Contact</h2>
-  <p>Questions? Reach out at <a href="mailto:erik.z.wik@gmail.com">erik.z.wik@gmail.com</a>.</p>
-</body>
+    <h2>Contact</h2>
+    <p>
+      Questions? Reach out at
+      <a href="mailto:erik.z.wik@gmail.com">erik.z.wik@gmail.com</a>.
+    </p>
+  </body>
 </html>
